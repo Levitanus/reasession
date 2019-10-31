@@ -14,18 +14,18 @@ class ExtStateHandler(IHandler):
     extkey = 'DATA'
 
     def can_handle(self, data_type: bytes) -> bool:
-        if data_type == b'ext_state_set':
-            rpr_print('can handle ext_state_set')
+        if data_type == b'ext_set':
+            rpr_print('can handle ext_set')
             return True
-        if data_type == b'ext_state_get':
-            rpr_print('can handle ext_state_get')
+        if data_type == b'ext_get':
+            rpr_print('can handle ext_get')
             return True
         rpr_print(f"can't handle {data_type}")
         return False
 
     def handle(self, data_type: bytes, data: bytes) -> bytes:
         # rpr.print(str(data, 'utf-8'))
-        if data_type == b'ext_state_get':
+        if data_type == b'ext_get':
             return self._get_state(data)
         return self._set_state(data)
 

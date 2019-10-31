@@ -14,7 +14,7 @@ from reaper_python import *
 host, port = get_host_port()
 data = RPR_GetExtState('TCP_PACKAGE', 'DATA')
 try:
-    retval = send_data("ext_state_set", data, host, port)
+    retval = send_data("ext_set", data, host, port)
 except st.timeout as e:
     retval = f'connection timeout:\n{e}'
 except ConnectionRefusedError as e:

@@ -14,7 +14,7 @@ import socket as st
 host, port = get_host_port()
 data = 'NO_DATA'
 try:
-    data = send_data('ext_state_get', "getting(doesn't matters)", host, port)
+    data = send_data('ext_get', "getting(doesn't matters)", host, port)
 except st.timeout as e:
     data = f'connection timeout:\n{e}'
 except ConnectionRefusedError as e:

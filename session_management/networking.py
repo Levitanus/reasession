@@ -94,7 +94,10 @@ class SlaveTCPHandler(ss.BaseRequestHandler):
         package = self.request.recv(1024)
         data_type = package[:10].strip(b'0')
         data_size = package[11:20].strip(b'0')
+        # RPR_ShowConsoleMsg(str(data_type) + '\n')
+        # RPR_ShowConsoleMsg(str(data_size) + '\n')
         data = package[20:]
+        # RPR_ShowConsoleMsg(str(data) + '\n')
         data = self._request_data(data, data_size, package)
         response = self._get_response(data_type, data)
         self.request.sendall(response)
