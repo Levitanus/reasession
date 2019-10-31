@@ -34,7 +34,9 @@ class ExtStateHandler(IHandler):
         return bytes(str(retval), 'utf-8')
 
     def _set_state(self, data: bytes) -> bytes:
-        retval = RPR_SetExtState(self.extname, self.extkey, data, False)
+        retval = RPR_SetExtState(
+            self.extname, self.extkey, str(data, 'utf-8'), False
+        )
         return bytes(str(retval), 'utf-8')
 
 
