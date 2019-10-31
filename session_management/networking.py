@@ -2,7 +2,8 @@ import socket as st
 import socketserver as ss
 import json as js
 import typing as ty
-import typing_extensions as te
+# import typing_extensions as te
+# from reaper_python import *
 
 DEF_HOST = '127.0.0.1'
 DEF_PORT = 49541
@@ -54,7 +55,7 @@ def send_data(
     return received
 
 
-class IHandler(te.Protocol):
+class IHandler:
     """Base class for slave handlers.
 
     can_handle(self, data_type: bytes) -> bool:
@@ -89,6 +90,7 @@ class SlaveTCPHandler(ss.BaseRequestHandler):
 
     def handle(self) -> None:
         """Get data from client and process with handlers."""
+        # RPR_ShowConsoleMsg('handle' + '\n')
         package = self.request.recv(1024)
         data_type = package[:10].strip(b'0')
         data_size = package[11:20].strip(b'0')
