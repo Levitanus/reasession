@@ -4,8 +4,132 @@
 		"selected_items":
 		[
 			[
+				"server",
+				"server_thread\tstatement"
+			],
+			[
+				"serve",
+				"server_thread\tstatement"
+			],
+			[
+				"Tr",
+				"True"
+			],
+			[
+				"ser",
+				"serve_forever\tfunction"
+			],
+			[
+				"ran",
+				"random\tstatement"
+			],
+			[
+				"long",
+				"long_n\tfunction"
+			],
+			[
+				"for",
+				"for\tfor i=1,10"
+			],
+			[
+				"clear",
+				"reaper.ClearConsole"
+			],
+			[
+				"midibuf",
+				"midibuf_to_tracks"
+			],
+			[
+				"midi_ins",
+				"reaper.MIDI_InsertNote"
+			],
+			[
+				"Clea",
+				"reaper.ClearConsole"
+			],
+			[
+				"add_jsf",
+				"add_jsfx_to_tracks"
+			],
+			[
+				"add_jsfx",
+				"add_jsfx_to_track"
+			],
+			[
+				"fo",
+				"fori\tfor i,v in ipairs()"
+			],
+			[
+				"get_midi_from_tr",
+				"get_midi_from_tracks"
+			],
+			[
+				"slider",
+				"slider1"
+			],
+			[
+				"msg1",
+				"msg1Print"
+			],
+			[
+				"slide",
+				"slider1"
+			],
+			[
+				"str",
+				"strcpy_from"
+			],
+			[
+				"file",
+				"file_mem"
+			],
+			[
+				"mem",
+				"memPtr"
+			],
+			[
+				"msg",
+				"msg1Offset"
+			],
+			[
+				"qn",
+				"qnOffset"
+			],
+			[
+				"midi",
+				"midisend"
+			],
+			[
+				"gmem",
+				"gmemPtr"
+			],
+			[
+				"stor",
+				"storedMessages"
+			],
+			[
+				"Midi",
+				"MidiBuffer"
+			],
+			[
+				"fun",
+				"function\tfunction"
+			],
+			[
 				"data",
-				"data_type"
+				"data_size\tstatement"
+			],
+			[
+				"DEF",
+				"DEF_PORT\tstatement"
+			],
+			[
+				"get",
+				"get_host_port\tfunction"
+			],
+			[
+				"typi",
+				"typing\tmodule"
 			],
 			[
 				"dist",
@@ -80,10 +204,6 @@
 				"_UDPHandler\tclass"
 			],
 			[
-				"ser",
-				"server_close\tfunction"
-			],
-			[
 				"clo",
 				"server_close\tfunction"
 			],
@@ -94,10 +214,6 @@
 			[
 				"P",
 				"PrintHandler\tclass"
-			],
-			[
-				"DEF",
-				"DEF_PORT\tinstance"
 			],
 			[
 				"net",
@@ -140,10 +256,6 @@
 				"BaseRequestHandler\tclass"
 			],
 			[
-				"serve",
-				"server_close\tfunction"
-			],
-			[
 				"SOCK_S",
 				"SOCK_STREAM\tinstance"
 			],
@@ -176,10 +288,6 @@
 				"state2_str\tstatement"
 			],
 			[
-				"str",
-				"strNeedBig\tstatement"
-			],
-			[
 				"in",
 				"inside_reaper\tclass"
 			],
@@ -194,10 +302,6 @@
 			[
 				"sub",
 				"sub_package\tmodule"
-			],
-			[
-				"get",
-				"get_selected_item\tfunction"
 			],
 			[
 				"tr",
@@ -272,10 +376,6 @@
 				"NoneType"
 			],
 			[
-				"Midi",
-				"MIDIEditor\tclass"
-			],
-			[
 				"Rea",
 				"ReaperConsole"
 			],
@@ -332,28 +432,43 @@
 	"buffers":
 	[
 		{
-			"file": "setup.py",
+			"file": "session_management/master.py",
 			"settings":
 			{
-				"buffer_size": 234,
+				"buffer_size": 2221,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "session_management/slave.py",
+			"settings":
+			{
+				"buffer_size": 1135,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "session_management/tcp_server_reascript.py",
+			"file": "session_management/test.py",
 			"settings":
 			{
-				"buffer_size": 1725,
-				"encoding": "UTF-8",
+				"buffer_size": 132,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "session_management/TCP_client_reascript.py",
+			"file": "session_management/controller.kv",
 			"settings":
 			{
-				"buffer_size": 273,
+				"buffer_size": 866,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "session_management/test_lazy.py",
+			"settings":
+			{
+				"buffer_size": 1112,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -362,14 +477,55 @@
 			"file": "session_management/networking.py",
 			"settings":
 			{
-				"buffer_size": 3867,
+				"buffer_size": 4093,
+				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		}
 	],
-	"build_system": "Packages/Python/Python.sublime-build",
+	"build_system": "Anaconda Python Builder",
 	"build_system_choices":
 	[
+		[
+			[
+				[
+					"Anaconda Python Builder",
+					""
+				],
+				[
+					"Packages/Python/Python.sublime-build",
+					""
+				],
+				[
+					"Packages/Python/Python.sublime-build",
+					"Syntax Check"
+				],
+				[
+					"Packages/User/python3_my.sublime-build",
+					""
+				]
+			],
+			[
+				"Anaconda Python Builder",
+				""
+			]
+		],
+		[
+			[
+				[
+					"Packages/Lua/Lua.sublime-build",
+					""
+				],
+				[
+					"Packages/User/python3_my.sublime-build",
+					""
+				]
+			],
+			[
+				"Packages/Lua/Lua.sublime-build",
+				""
+			]
+		],
 		[
 			[
 				[
@@ -395,7 +551,31 @@
 		"selected_items":
 		[
 			[
+				"Package Control: install",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: insta",
+				"Package Control: Install Package"
+			],
+			[
+				"remo",
+				"Package Control: Remove Package"
+			],
+			[
 				"Package Control: instal",
+				"Package Control: Install Package"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"remove",
+				"Package Control: Remove Package"
+			],
+			[
+				"package",
 				"Package Control: Install Package"
 			],
 			[
@@ -411,15 +591,7 @@
 				"Package Control: Remove Package"
 			],
 			[
-				"Package Control: install",
-				"Package Control: Install Package"
-			],
-			[
 				"Package Control: re",
-				"Package Control: Remove Package"
-			],
-			[
-				"remo",
 				"Package Control: Remove Package"
 			],
 			[
@@ -454,6 +626,69 @@
 	],
 	"file_history":
 	[
+		"/home/levitanus/Документы/ремонт",
+		"/home/levitanus/Загрузки/DPF-master/examples/TcpBridge/TcpBridgePlugin.cpp",
+		"/home/levitanus/.config/REAPER/Data/Reaticulate.reabank",
+		"/home/levitanus/Загрузки/DPF-master/examples/Parameters/ExamplePluginParameters.cpp",
+		"/home/levitanus/Загрузки/DPF-master/examples/TcpBridge/cross-platform-tcp-libraries-master/Demos/ClientMain.cpp",
+		"/home/levitanus/NetworkMidi/Source/PluginEditor.cpp",
+		"/home/levitanus/Загрузки/DPF-master/examples/TcpBridge/Makefile",
+		"/home/levitanus/Загрузки/DPF-master/examples/TcpBridge/cross-platform-tcp-libraries-master/Linux/Makefile",
+		"/home/levitanus/Загрузки/DPF-master/examples/MidiThrough/MidiThroughExamplePlugin.cpp",
+		"/home/levitanus/Загрузки/DPF-master/Makefile",
+		"/home/levitanus/Загрузки/DPF-master/Makefile.base.mk",
+		"/home/levitanus/Загрузки/DPF-master/examples/Info/Makefile",
+		"/home/levitanus/Загрузки/iPlug2-linux/Examples/IPlugMinimal/Makefile",
+		"/home/levitanus/gits/session-management/session_management/session_management_GUI.lua",
+		"/home/levitanus/.config/REAPER/Scripts/RenderMidi/render_midi.lua",
+		"/home/levitanus/gits/session-management/session_management/project.lua",
+		"/home/levitanus/.config/REAPER/Scripts/getSetTempoMarker/GetTempoMarker02.lua",
+		"/home/levitanus/.config/REAPER/Scripts/ReaTeam Scripts/Development/Lokasenna_GUI v2/Developer Tools/Examples and Templates/Example - General demonstration.lua",
+		"/home/levitanus/Загрузки/iPlug2-linux/common-linux.mk",
+		"/media/levitanus/RaidNew/_temp/test_proj.RPP",
+		"/home/levitanus/.config/REAPER/TrackTemplates/test_templ.RTrackTemplate",
+		"/home/levitanus/лекция про классику/сумма1",
+		"/home/levitanus/.config/REAPER/Scripts/ReaTeam Scripts/Development/Lokasenna_GUI v2/Developer Tools/Examples and Templates/Example - Adding a Main loop, working with Z layers, and Rewriting Methods.lua",
+		"/home/levitanus/.config/REAPER/Scripts/TestIsOrchestralProjects/New Master Orchestral Project.lua",
+		"/home/levitanus/.config/REAPER/Scripts/RenderMidi/serdes.lua",
+		"/home/levitanus/.config/REAPER/Scripts/RenderMidi/json.lua",
+		"/home/levitanus/.config/REAPER/Effects/render_midi",
+		"/media/levitanus/Files/введение Алене",
+		"/home/levitanus/.config/REAPER/Scripts/RenderMidi/build_midi.lua",
+		"/home/levitanus/.config/REAPER/Scripts/TestTrackChunk01/testlua.lua",
+		"/home/levitanus/.config/REAPER/Scripts/ReaTeam Scripts/MIDI Editor/js_Mouse editing - Stretch and Compress.lua",
+		"/home/levitanus/.config/REAPER/Scripts/print_gmem.lua",
+		"/home/levitanus/.config/REAPER/Scripts/RenderMidi/render_master_midi.lua",
+		"/home/levitanus/.config/REAPER/Scripts/TestTrackChunk01/Set Project Chunk 02.lua",
+		"/home/levitanus/.config/REAPER/Scripts/ReaTeam Scripts/Development/Lokasenna_Script Compiler.lua",
+		"/home/levitanus/.config/sublime-text-3/Packages/User/ReaSyntax.sublime-settings",
+		"/home/levitanus/.config/sublime-text-3/Packages/ReaSyntax/ReaSyntax.sublime-settings",
+		"/home/levitanus/.config/REAPER/Scripts/TestTrackChunk01/Get Project Chunk 02.lua",
+		"/home/levitanus/.config/REAPER/Scripts/TestTrackChunk01/utils.lua",
+		"/home/levitanus/.config/REAPER/Effects/Render",
+		"/home/levitanus/.config/REAPER/Data/Render",
+		"/home/levitanus/NetworkMidi/Source/PluginProcessor.h",
+		"/home/levitanus/NetworkMidi/Source/PluginProcessor.cpp",
+		"/home/levitanus/NetworkMidi/Source/PluginEditor.h",
+		"/home/levitanus/Загрузки/JUCE-5.3.2/modules/juce_gui_basics/widgets/juce_Label.h",
+		"/home/levitanus/Загрузки/JUCE-5.3.2/modules/juce_gui_basics/widgets/juce_Label.cpp",
+		"/home/levitanus/.config/sublime-text-3/Packages/User/Anaconda.sublime-settings",
+		"/home/levitanus/.config/REAPER/Scripts/TestTrackChunk01/GetTrackChunk.lua",
+		"/home/levitanus/.config/REAPER/Data/reticulate example bank.txt",
+		"/home/levitanus/.config/sublime-text-3/Packages/LuaComplete/LuaComplete.sublime-settings",
+		"/home/levitanus/.config/sublime-text-3/Packages/User/LuaComplete.sublime-settings",
+		"/home/levitanus/.config/sublime-text-3/Packages/Anaconda/Anaconda.sublime-settings",
+		"/home/levitanus/gits/session-management/setup.py",
+		"/home/levitanus/gits/session-management/session_management/networking.py",
+		"/home/levitanus/gits/session-management/session_management/TCP_server_reascript.py",
+		"/home/levitanus/.config/REAPER/Scripts/TestTrackChunk01/testlua,lua",
+		"/home/levitanus/.config/REAPER/Scripts/TestTrackChunk01/SetTrackChunk.lua",
+		"/home/levitanus/gits/session-management/session_management/TCP_send_reascript.py",
+		"/home/levitanus/gits/session-management/session_management/TCP_get_reascript.py",
+		"/home/levitanus/gits/session-management/session_management/TCP_fill_test_data.py",
+		"/home/levitanus/gits/session-management/session_management/TCP_print_data.py",
+		"/home/levitanus/gits/session-management/session_management/TCP_funcs.py",
+		"/home/levitanus/gits/session-management/session_management/rpr_print.py",
 		"/home/levitanus/gits/session-management/session_management/basic_handlers.py",
 		"/home/levitanus/gits/session-management/controller.kv",
 		"/home/levitanus/gits/session-management/networking.py",
@@ -491,9 +726,7 @@
 		"/home/levitanus/.local/lib/python3.7/site-packages/reapy/tools/__init__.py",
 		"/home/levitanus/gits/sample_editor/sample_editor/test.py",
 		"/home/levitanus/Загрузки/LinVst-master/Makefile-embed-6432",
-		"/home/levitanus/.config/sublime-text-3/Packages/Anaconda/Anaconda.sublime-settings",
 		"/home/levitanus/gits/sample_editor/sample_editor.sublime-project",
-		"/home/levitanus/.config/sublime-text-3/Packages/User/Anaconda.sublime-settings",
 		"/media/levitanus/RaidNew/progr/reapy/reapy/tools/__init__.pyi",
 		"/media/levitanus/RaidNew/progr/reapy/reapy/reascript_api.py",
 		"/home/levitanus/.config/sublime-text-3/Packages/User/python3_my.sublime-build",
@@ -520,68 +753,7 @@
 		"/D/gits/reapy/reapy/core/window/tooltip.pyi",
 		"/D/gits/reapy/reapy/core/window/tooltip.py",
 		"/D/gits/reapy/reapy/__init__.pyi",
-		"/D/gits/reapy/reapy/py.typed",
-		"/D/gits/reapy/reapy/core/item/item.pyi",
-		"/D/gits/reapy/reapy/core/item/item.py",
-		"/D/gits/reapy/reapy/core/track/track.py",
-		"/D/gits/reapy/reapy/core/fx/fx_param.pyi",
-		"/D/gits/reapy/reapy/core/fx/fx.pyi",
-		"/D/gits/reapy/reapy/core/reapy_object.py",
-		"/D/gits/reapy/reapy/core/fx/__init__.pyi",
-		"/D/gits/reapy/reapy/core/item/take.py",
-		"/D/gits/reapy/reapy/core/item/take.pyi",
-		"/D/gits/reapy/reapy/core/item/source.pyi",
-		"/D/gits/reapy/reapy/core/item/midi_event.pyi",
-		"/D/gits/reapy/reapy/core/item/__init__.pyi",
-		"/D/gits/reapy/reapy/core/project/time_selection.py",
-		"/D/gits/reapy/reapy/core/project/time_selection.pyi",
-		"/D/gits/reapy/reapy/core/project/region.py",
-		"/D/gits/reapy/reapy/core/project/region.pyi",
-		"/D/gits/reapy/reapy/core/project/project.py",
-		"/D/gits/reapy/reapy/core/project/project.pyi",
-		"/D/gits/reapy/reapy/core/project/marker.py",
-		"/D/gits/reapy/reapy/core/project/marker.pyi",
-		"/D/gits/reapy/reapy/core/project/__init__.pyi",
-		"/D/gits/reapy/reapy/core/reaper/ui.pyi",
-		"/D/gits/reapy/reapy/core/reaper/midi.py",
-		"/D/gits/reapy/reapy/core/reaper/midi.pyi",
-		"/D/gits/reapy/reapy/core/reaper/defer.pyi",
-		"/D/gits/reapy/reapy/core/reaper/audio.py",
-		"/D/gits/reapy/reapy/core/reaper/audio.pyi",
-		"/D/gits/reapy/reapy/core/reaper/__init__.pyi",
-		"/D/gits/reapy/reapy/core/track/track.pyi",
-		"/D/gits/reapy/reapy/core/track/send.pyi",
-		"/D/gits/reapy/reapy/core/track/automation_item.pyi",
-		"/D/gits/reapy/reapy/core/track/automation_item.py",
-		"/D/gits/reapy/reapy/core/envelope.pyi",
-		"/D/gits/reapy/reapy/core/track/__init__.pyi",
-		"/D/gits/reapy/reapy/core/window/midi_editor.py",
-		"/D/gits/reapy/reapy/core/window/midi_editor.pyi",
-		"/D/gits/reapy/reapy/core/window/window.pyi",
-		"/D/gits/reapy/reapy/core/window/__init__.pyi",
-		"/D/gits/reapy/reapy/core/audio_accessor.pyi",
-		"/D/gits/reapy/reapy/tools/inside_reaper.py",
-		"/D/gits/reapy/reapy/tools/__init__.py",
-		"/D/gits/reapy/reapy/core/reapy_object.pyi",
-		"/D/gits/reapy/reapy/core/__init__.pyi",
-		"/D/gits/reapy/reapy/reascripts/__init__.pyi",
-		"/D/gits/reapy/reapy/tools/network/web_interface.pyi",
-		"/D/gits/reapy/reapy/tools/network/server.py",
-		"/D/gits/reapy/reapy/tools/network/server.pyi",
-		"/D/gits/reapy/reapy/tools/network/socket.pyi",
-		"/D/gits/reapy/reapy/tools/network/socket.py",
-		"/C/Users/Levitanus/AppData/Local/Programs/Python/Python37/Lib/site-packages/typeshed/stdlib/2and3/socket.pyi",
-		"/C/Users/Levitanus/AppData/Local/Programs/Python/Python37/Lib/site-packages/typeshed/stdlib/3/socketserver.pyi",
-		"/C/Users/Levitanus/AppData/Local/Programs/Python/Python37/Lib/site-packages/typeshed/stdlib/2/_socket.pyi",
-		"/C/Users/Levitanus/AppData/Local/Programs/Python/Python37/Lib/socket.py",
-		"/D/gits/reapy/reapy/tools/network/client.py",
-		"/D/gits/reapy/reapy/tools/network/client.pyi",
-		"/D/gits/reapy/reapy/tools/network/__init__.pyi",
-		"/D/gits/reapy/reapy/tools/__init__.pyi",
-		"/D/gits/reapy/reapy/tools/json.pyi",
-		"/D/gits/reapy/reapy/tools/json.py",
-		"/C/Users/Levitanus/AppData/Local/Programs/Python/Python37/Lib/site-packages/typeshed/stdlib/2/json.pyi",
-		"/C/Users/Levitanus/AppData/Local/Programs/Python/Python37/lib/importlib/__init__.py"
+		"/D/gits/reapy/reapy/py.typed"
 	],
 	"find":
 	{
@@ -600,6 +772,114 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"True",
+			"MidiThroughExamplePlugin",
+			"f;",
+			"f",
+			"override",
+			"84,2",
+			"84,1",
+			"cc@1:84,1",
+			"wnd_test",
+			"btn_click",
+			"go",
+			"self",
+			":",
+			"pr_type",
+			"msg(",
+			"note",
+			"length",
+			"pr_length",
+			"midibuf_to_track",
+			"erase_items_on_track",
+			"insert_events",
+			"filter_notes",
+			"extract_note",
+			"bytesToString",
+			"Array",
+			"built_midi_on_tracks",
+			"build_midi_on_track",
+			"midi_l",
+			"tracks_l",
+			"table.maxn",
+			"table",
+			"midi_buf",
+			"tr",
+			"function",
+			"print",
+			" msg",
+			"msg",
+			"print",
+			"MIDI_SetAllEvts",
+			"MIDI_",
+			"MIDI_InsertEvt",
+			"reaper.MIDI_InsertEvt",
+			"render_master_midi",
+			"render_master_midi.render(",
+			"render_master_midi.render",
+			"render_midi_of_selected_tracks_in_active_project",
+			"tracks",
+			"original_str",
+			"original_int",
+			"{",
+			"RENDER",
+			"::",
+			"serdes",
+			"::",
+			"serdes",
+			"function",
+			"tab",
+			"make_from_table",
+			"print(",
+			"break",
+			" '",
+			"nkey",
+			"k",
+			"nval",
+			"val_norm",
+			"key_norm",
+			"coount_gets",
+			"0[0]",
+			"memPtr",
+			"qnOffset",
+			"1",
+			"qn",
+			"qnOffset",
+			"qn",
+			"msg1Offset",
+			"1",
+			"Offset",
+			"qnOffset",
+			"msg1",
+			"Offset",
+			"line",
+			"NetworkMidiAudioProcessorEditor",
+			"textLabel",
+			"paint",
+			"hello",
+			"art",
+			"art17",
+			"program",
+			":",
+			"program",
+			"bus:1",
+			"art",
+			"art1",
+			"25",
+			"//!",
+			"g=2 ",
+			"//!",
+			"circle",
+			"//!",
+			"long",
+			"gliss",
+			"DATA",
+			"exs_set",
+			"ext_state_get",
+			"ext_state_set",
+			"HOST",
+			"retval",
+			"key",
 			"httpd",
 			"rename",
 			"data",
@@ -619,23 +899,7 @@
 			"harmonics",
 			"ponticello",
 			"trem",
-			"build",
-			"test",
-			"FXList",
-			"CC_INFOS_T",
-			"TMEL",
-			"CCList",
-			"T",
-			"ty,",
-			"MIDINoteNames",
-			"float",
-			"bytes",
-			"disconnect",
-			"conn",
-			"connec",
-			"_acc",
-			"T2",
-			"def __init__(self):"
+			"build"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -643,6 +907,7 @@
 		"regex": false,
 		"replace_history":
 		[
+			"count_gets"
 		],
 		"reverse": false,
 		"show_context": true,
@@ -658,147 +923,204 @@
 			[
 				{
 					"buffer": 0,
-					"file": "setup.py",
+					"file": "session_management/master.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 234,
+						"buffer_size": 2221,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								50,
-								50
+								507,
+								507
 							]
 						],
 						"settings":
 						{
-							"SL.28.region_keys":
+							"SL.14.region_keys":
 							[
+								"SL.pycodestyle.Highlights.|c43fb759dca4f8461656cb152e880584de4a384d3b8fe273bc4f947031b1c386|region.greenish markup.error.sublime_linter|1316",
+								"SL.flake8.Highlights.|7d7ca4a320e1eade63809dca31408af3c9fc92e0d521251af5537606cbcd322a|region.yellowish markup.warning.sublime_linter|1316",
+								"SL.pycodestyle.Highlights.|9e0feece72fb7717f9b575520b2a6f397e0111dafd7c66ef2300ec9dccfe7dcf|region.greenish markup.error.sublime_linter|1316",
+								"SL.flake8.Highlights.|00a5dd40e6e8a0f63f611b72a7208eac307296c1a53751af5591d0c095bf2206|region.yellowish markup.warning.sublime_linter|1316",
+								"SL.flake8.Highlights.|4a8a2d5c75d5dfdf0610ba3e8e5fb46c99f5683a07168a043f4b496b3a9895f1|region.yellowish markup.warning.sublime_linter|1316",
+								"SL.mypy.Highlights.|cffb563a9a114f723ecd43a0285294bc6e6eb49be81293a89e208ffe83c1fbae|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|78a4bd18c5e82b0772e5366b3248c0d9cf7119301a6ba0791ebe0df87b85efbe|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|c2c4b71d1340f369b3a3bcbcc3e64e1fb8b694621b6a07bf7cb1e4e01555c1a1|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|b47df79ca2229fc2b94109d80430d02229d337cb355918d5be867d10c14d00bb|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|61d5f79f1ee0955db036fd6e2b52d2d8b2544453db48180f0aa29967cb2656ba|region.orangish markup.error.sublime_linter|256",
 								"SL.mypy.Gutter.|region.orangish markup.error.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/x.png",
-								"SL.mypy.Highlights.|c4d8503362b78ad9da1c86eacb68b3e88b11297b75a8a4d30a79aae666862f02|region.orangish markup.error.sublime_linter|256",
-								"SL.mypy.Highlights.|a4ee3f96ba37e569aefecbba828caa19019a6d23f21d77e6a84697572e9eea50|region.orangish markup.error.sublime_linter|256",
-								"sublime_linter.protected_regions"
+								"SL.mypy.Highlights.|9800591d69d6385c0e3812e0d0ef9fc155473e1805a80f0a7fb4d51dc26d2fa6|region.orangish markup.error.sublime_linter|256",
+								"SL.pycodestyle.Gutter.|region.greenish markup.warning.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/pointer.png",
+								"SL.mypy.Highlights.|798437c3f603904c2c16e2744ce3c3317400336a232325a86c63979022a458f7|region.orangish markup.error.sublime_linter|256",
+								"SL.flake8.Highlights.|560c83f3c2769742a9cceb07eedcf01e2c1606c0fec20949f0075a976e9ee8c5|region.yellowish markup.warning.sublime_linter|1316",
+								"SL.mypy.Highlights.|af4e4c31a0e6723117ffbe5a86be129ab313be782ca3dffb606d24b1715cd344|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|591345fa3a1fdf0a6304040fe22c272ba85cb4dcd7881fc6d635daa2606bb933|region.orangish markup.error.sublime_linter|256",
+								"SL.flake8.Highlights.|48a0058b407570eb90ebc8aaf1cc9c7d54b83166691b3b2afa4fde2ebbd916de|region.yellowish markup.warning.sublime_linter|1316",
+								"SL.mypy.Highlights.|6fba3272870fbdd076833fe9277fb945dfa90b4919765ecdee9e148b67cab18e|region.orangish markup.error.sublime_linter|256",
+								"SL.pycodestyle.Highlights.|efca4bb7e04a0efe47df034a3c90c334596790aafa9629c156a676aabf89bb19|region.greenish markup.error.sublime_linter|1316",
+								"SL.mypy.Highlights.|2477f17c5833dc6d0820447694ae6955aeedb886c6099a4d9ce5e25909b878de|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|dfef3a5568037ae4027e76d2eece5572de938caadc31390e0139d58cc90eced3|region.orangish markup.error.sublime_linter|256",
+								"SL.flake8.Highlights.|d05bcbe258d75256a121f1a043cb0179180707e33e8e57b154c754dfd70e2f76|region.yellowish markup.warning.sublime_linter|1316",
+								"SL.flake8.Highlights.|93200eb09618647ccd6dea1b5b0e9977a1332a5345920b21a4d63a33326b7b3c|region.yellowish markup.warning.sublime_linter|1316",
+								"SL.pycodestyle.Highlights.|764b16e575d1718a076bb36c0c2eb7b2b71a02747a0efc1176529643b41a5941|region.greenish markup.error.sublime_linter|1316",
+								"SL.mypy.Highlights.|3de05f7f90459ba2c555cd9e1fda32ced95cd1cb2e6273f6b31321700d61234c|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|310fb50ebc0be02e8cc4d660c8fa9f870f1f68fa8ce9ac4e63a3f77cd4538210|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|7c5943efa4ddc5595f1379d527c72859dce34dad76a4dc94cb5926d78e96d064|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|9fb5756e40b4df4a573bcae2adaebbb4c5560ca9bc7cccf55c96d59d7672e277|region.orangish markup.error.sublime_linter|256",
+								"SL.flake8.Highlights.|efa27be9812bd595773a735ce6d883a4f07431f8e3104a14675cf660e63b15cf|region.yellowish markup.warning.sublime_linter|1316",
+								"SL.pycodestyle.Highlights.|2881285f4433ed8ddfc1c43c17d7d9a5ace1b645b6501771fa37ed7bdb1ffd8e|region.greenish markup.error.sublime_linter|1316",
+								"SL.mypy.Highlights.|93d9c8a1ead2fd96653961e2f1f16d6691752d31207f47c277ca5f2b8b564203|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|bb9d1a46aabc45895c924c1d40c4142816b772771908c3e72a8b6cf21fd57460|region.orangish markup.error.sublime_linter|256",
+								"SL.flake8.Highlights.|6018350b981a3cbf9c52c6fa88e15d1a2e49c6d8b56011926972260142884f73|region.yellowish markup.warning.sublime_linter|1316",
+								"sublime_linter.protected_regions",
+								"SL.pycodestyle.Highlights.|1682f36531e3b1bb6e42c44992c526ea01cdbd7f1091b3270c9f9e4376f36bc6|region.greenish markup.warning.sublime_linter|2340",
+								"SL.mypy.Highlights.|3925bd1de6746592e8fca857a2b1c73c91a51b4596a55c70d0cd610464d7b20f|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|99da05f76723be1f2be6425e64c1242a5c60b5522333a2129289678656da292b|region.orangish markup.error.sublime_linter|256",
+								"SL.pycodestyle.Highlights.|64106bf627481ec9260f3585ace150ab41a50de3520dd5aea87bf8c5c1826078|region.greenish markup.error.sublime_linter|1316",
+								"SL.pycodestyle.Gutter.|region.greenish markup.error.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/pointer.png",
+								"SL.mypy.Highlights.|fc4e3c371dc6acf3fa9209acfc9aed9339656118c850fd866ac4031a9197ab64|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|fcb74112bcadfefd0087e34eee92f53ea008aaefd914ed82c5ff4a069ba5dc27|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|cf4aa0ad8676bc6b254a48468476264e6dfc3f82f2f27360d6ab92bcfdcc12c2|region.orangish markup.error.sublime_linter|256",
+								"SL.flake8.Gutter.|region.yellowish markup.warning.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/triangle.png",
+								"SL.flake8.Highlights.|145f2cf667b43484c093baa2b0fcf1f328083209157d6f950f5d7cd04d18a842|region.yellowish markup.warning.sublime_linter|1316",
+								"SL.mypy.Highlights.|9b54ba87b05dcdf526020ab70f16bcf80cb58b4a18695161e2219450335af996|region.orangish markup.error.sublime_linter|256"
+							],
+							"SL.67.region_keys":
+							[
+								"SL.mypy.Highlights.|3925bd1de6746592e8fca857a2b1c73c91a51b4596a55c70d0cd610464d7b20f|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|61d5f79f1ee0955db036fd6e2b52d2d8b2544453db48180f0aa29967cb2656ba|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|fc4e3c371dc6acf3fa9209acfc9aed9339656118c850fd866ac4031a9197ab64|region.orangish markup.error.sublime_linter|256",
+								"SL.flake8.Gutter.|region.yellowish markup.warning.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/triangle.png",
+								"SL.pycodestyle.Highlights.|64106bf627481ec9260f3585ace150ab41a50de3520dd5aea87bf8c5c1826078|region.greenish markup.error.sublime_linter|1316",
+								"SL.mypy.Highlights.|93d9c8a1ead2fd96653961e2f1f16d6691752d31207f47c277ca5f2b8b564203|region.orangish markup.error.sublime_linter|256",
+								"SL.pycodestyle.Gutter.|region.greenish markup.warning.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/pointer.png",
+								"SL.mypy.Highlights.|9fb5756e40b4df4a573bcae2adaebbb4c5560ca9bc7cccf55c96d59d7672e277|region.orangish markup.error.sublime_linter|256",
+								"SL.flake8.Highlights.|560c83f3c2769742a9cceb07eedcf01e2c1606c0fec20949f0075a976e9ee8c5|region.yellowish markup.warning.sublime_linter|1316",
+								"SL.pycodestyle.Highlights.|9e0feece72fb7717f9b575520b2a6f397e0111dafd7c66ef2300ec9dccfe7dcf|region.greenish markup.error.sublime_linter|1316",
+								"SL.flake8.Highlights.|48a0058b407570eb90ebc8aaf1cc9c7d54b83166691b3b2afa4fde2ebbd916de|region.yellowish markup.warning.sublime_linter|1316",
+								"SL.flake8.Highlights.|7d7ca4a320e1eade63809dca31408af3c9fc92e0d521251af5537606cbcd322a|region.yellowish markup.warning.sublime_linter|1316",
+								"SL.mypy.Highlights.|78a4bd18c5e82b0772e5366b3248c0d9cf7119301a6ba0791ebe0df87b85efbe|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|bb9d1a46aabc45895c924c1d40c4142816b772771908c3e72a8b6cf21fd57460|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Gutter.|region.orangish markup.error.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/x.png",
+								"SL.pycodestyle.Highlights.|efca4bb7e04a0efe47df034a3c90c334596790aafa9629c156a676aabf89bb19|region.greenish markup.error.sublime_linter|1316",
+								"SL.mypy.Highlights.|cffb563a9a114f723ecd43a0285294bc6e6eb49be81293a89e208ffe83c1fbae|region.orangish markup.error.sublime_linter|256",
+								"SL.pycodestyle.Highlights.|1682f36531e3b1bb6e42c44992c526ea01cdbd7f1091b3270c9f9e4376f36bc6|region.greenish markup.warning.sublime_linter|2340",
+								"SL.mypy.Highlights.|3de05f7f90459ba2c555cd9e1fda32ced95cd1cb2e6273f6b31321700d61234c|region.orangish markup.error.sublime_linter|256",
+								"SL.pycodestyle.Highlights.|764b16e575d1718a076bb36c0c2eb7b2b71a02747a0efc1176529643b41a5941|region.greenish markup.error.sublime_linter|1316",
+								"SL.flake8.Highlights.|93200eb09618647ccd6dea1b5b0e9977a1332a5345920b21a4d63a33326b7b3c|region.yellowish markup.warning.sublime_linter|1316",
+								"SL.mypy.Highlights.|798437c3f603904c2c16e2744ce3c3317400336a232325a86c63979022a458f7|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|6fba3272870fbdd076833fe9277fb945dfa90b4919765ecdee9e148b67cab18e|region.orangish markup.error.sublime_linter|256",
+								"SL.pycodestyle.Gutter.|region.greenish markup.error.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/pointer.png",
+								"sublime_linter.protected_regions",
+								"SL.mypy.Highlights.|310fb50ebc0be02e8cc4d660c8fa9f870f1f68fa8ce9ac4e63a3f77cd4538210|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|b47df79ca2229fc2b94109d80430d02229d337cb355918d5be867d10c14d00bb|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|591345fa3a1fdf0a6304040fe22c272ba85cb4dcd7881fc6d635daa2606bb933|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|2477f17c5833dc6d0820447694ae6955aeedb886c6099a4d9ce5e25909b878de|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|dfef3a5568037ae4027e76d2eece5572de938caadc31390e0139d58cc90eced3|region.orangish markup.error.sublime_linter|256",
+								"SL.flake8.Highlights.|6018350b981a3cbf9c52c6fa88e15d1a2e49c6d8b56011926972260142884f73|region.yellowish markup.warning.sublime_linter|1316",
+								"SL.pycodestyle.Highlights.|c43fb759dca4f8461656cb152e880584de4a384d3b8fe273bc4f947031b1c386|region.greenish markup.error.sublime_linter|1316",
+								"SL.mypy.Highlights.|7c5943efa4ddc5595f1379d527c72859dce34dad76a4dc94cb5926d78e96d064|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|c2c4b71d1340f369b3a3bcbcc3e64e1fb8b694621b6a07bf7cb1e4e01555c1a1|region.orangish markup.error.sublime_linter|256",
+								"SL.flake8.Highlights.|d05bcbe258d75256a121f1a043cb0179180707e33e8e57b154c754dfd70e2f76|region.yellowish markup.warning.sublime_linter|1316",
+								"SL.mypy.Highlights.|fcb74112bcadfefd0087e34eee92f53ea008aaefd914ed82c5ff4a069ba5dc27|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|9b54ba87b05dcdf526020ab70f16bcf80cb58b4a18695161e2219450335af996|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|9800591d69d6385c0e3812e0d0ef9fc155473e1805a80f0a7fb4d51dc26d2fa6|region.orangish markup.error.sublime_linter|256",
+								"SL.flake8.Highlights.|4a8a2d5c75d5dfdf0610ba3e8e5fb46c99f5683a07168a043f4b496b3a9895f1|region.yellowish markup.warning.sublime_linter|1316",
+								"SL.flake8.Highlights.|00a5dd40e6e8a0f63f611b72a7208eac307296c1a53751af5591d0c095bf2206|region.yellowish markup.warning.sublime_linter|1316",
+								"SL.mypy.Highlights.|cf4aa0ad8676bc6b254a48468476264e6dfc3f82f2f27360d6ab92bcfdcc12c2|region.orangish markup.error.sublime_linter|256",
+								"SL.flake8.Highlights.|145f2cf667b43484c093baa2b0fcf1f328083209157d6f950f5d7cd04d18a842|region.yellowish markup.warning.sublime_linter|1316",
+								"SL.pycodestyle.Highlights.|2881285f4433ed8ddfc1c43c17d7d9a5ace1b645b6501771fa37ed7bdb1ffd8e|region.greenish markup.error.sublime_linter|1316",
+								"SL.flake8.Highlights.|efa27be9812bd595773a735ce6d883a4f07431f8e3104a14675cf660e63b15cf|region.yellowish markup.warning.sublime_linter|1316",
+								"SL.mypy.Highlights.|99da05f76723be1f2be6425e64c1242a5c60b5522333a2129289678656da292b|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|af4e4c31a0e6723117ffbe5a86be129ab313be782ca3dffb606d24b1715cd344|region.orangish markup.error.sublime_linter|256"
 							],
 							"syntax": "Packages/Python/Python.sublime-syntax"
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 102.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
 					"buffer": 1,
-					"file": "session_management/tcp_server_reascript.py",
+					"file": "session_management/slave.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1725,
+						"buffer_size": 1135,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								272,
-								272
+								492,
+								492
 							]
 						],
 						"settings":
 						{
-							"SL.31.region_keys":
+							"SL.15.region_keys":
 							[
-								"SL.mypy.Highlights.|9946f6037fb7702cd37985f78c1e912a612844b786a79e2e6f13c7c62bf2132b|region.orangish markup.error.sublime_linter|256",
-								"SL.mypy.Highlights.|71951ee233609ca44a8230bb74782bea88c9ffafca29af3b99937d8560ae0b3f|region.orangish markup.error.sublime_linter|256",
-								"SL.mypy.Highlights.|c4af6b5747b229418f9635bf758e799efdbdf2e8c144b23560d391d77f4157bd|region.orangish markup.error.sublime_linter|256",
-								"SL.mypy.Highlights.|d5113fdebfcecc8fab031eb1d6ebd7c47859aa0a2ff8ebe88d3b19d5f7664ee8|region.orangish markup.error.sublime_linter|256",
-								"SL.mypy.Highlights.|27f04cbb56cc98fef487b258442ba864d736c46ba202d277e4f3f6741f679d50|region.orangish markup.error.sublime_linter|256",
 								"sublime_linter.protected_regions",
-								"SL.mypy.Highlights.|6a78aec2c98850b1f1af4761d8a0112a24eb89fb4ef96af493cad3ed91fdf6fc|region.orangish markup.error.sublime_linter|256",
-								"SL.mypy.Highlights.|d09ad18bad511d74939177fbbb14342efb0189e15615dc0fd3d889f1d25f824f|region.orangish markup.error.sublime_linter|256",
-								"SL.mypy.Highlights.|d43f5a736a932bc4502682fcfc3f1a9b24f0b3b70a142f1ea02366f42e8aad5e|region.orangish markup.error.sublime_linter|256",
-								"SL.mypy.Highlights.|1352486c2cd88958b3082615e6189d4b2bbcca3ecaa9c8f9f2e4d432a4faabb8|region.orangish markup.error.sublime_linter|256",
-								"SL.mypy.Highlights.|d5cfa552f29b57e9daaa4c250fd8087f719ca33e0a49d44f394457f1253032b8|region.orangish markup.error.sublime_linter|256",
-								"SL.mypy.Gutter.|region.orangish markup.error.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/x.png",
-								"SL.mypy.Highlights.|f44fa5ee39df110cded61dde45ea625793503d720ed10592c76d54b07e2201d7|region.orangish markup.error.sublime_linter|256",
-								"SL.mypy.Highlights.|46b70a7af67d0e2a738170805c66293b7c33a37d2cabb77838c3c3bc252cf624|region.orangish markup.error.sublime_linter|256",
-								"SL.mypy.Highlights.|0f710d7ea1044214fecff864c2386632f8aae82e6f9e16f34e68b38a7eea36ee|region.orangish markup.error.sublime_linter|256",
-								"SL.flake8.Highlights.|917be54c41bd5cc8910be72174ad937cceef4766933c8359cb39bfdb051ca3d9|region.yellowish markup.warning.sublime_linter|1316",
-								"SL.mypy.Highlights.|4c1e52adf7c813aee969b69a0d4e9295065424ff4bc8c79be8fd54f372525251|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|9c31c39d0cecb11050f3f63741cbb77fe3b44dd95b2aeff7d5f4b65c69f1a281|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|c32968fd1b1a01e4fa8343a1dd5752151302fdef8aa03db83f6baa37430a4bfb|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|6b31ffc4a9958334b2a21fe298e7d939a3a2af394883e1bc29951048196871ec|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|6384657a6edcbf021bdf6adb7a438b7fc56831d9cc7a27f041e2d17ed61bd58c|region.orangish markup.error.sublime_linter|256",
+								"SL.flake8.Highlights.|2ef536047c94e1a4133a2223c6c49f43fa2c02c27893ded80df803c79893d4b2|region.yellowish markup.warning.sublime_linter|32",
 								"SL.flake8.Gutter.|region.yellowish markup.warning.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/triangle.png",
-								"SL.flake8.Highlights.|20d5ed23b07d59ccf049ac1de596697e7b28f17be33abf630bac16910342ce84|region.yellowish markup.warning.sublime_linter|1316",
-								"SL.mypy.Highlights.|15dccc41ffb8dc4724d47bab2a587de79eec79a246af9163bc14fc6149646b1a|region.orangish markup.error.sublime_linter|256",
-								"SL.mypy.Highlights.|01467a1ba8cac3da9e5e9efd0e6f54fdeda5e05d1f9712758951fcb00ca579e4|region.orangish markup.error.sublime_linter|256"
+								"SL.mypy.Highlights.|7927307fec0e76e4af7a01f05ec6e7824e4825504ab1e98684ea523e5fe939a6|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|3d7e3fdcf8b2ad69ebcbb4e024c2a46e627bff32031014e21cbf9e7601864e80|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Gutter.|region.orangish markup.error.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/x.png"
+							],
+							"SL.16.region_keys":
+							[
+								"SL.mypy.Highlights.|9305be55bcb1b72801ea4bea5e40a9198b0b2ae6d9ceecb914d514322b685535|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|7927307fec0e76e4af7a01f05ec6e7824e4825504ab1e98684ea523e5fe939a6|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|6384657a6edcbf021bdf6adb7a438b7fc56831d9cc7a27f041e2d17ed61bd58c|region.orangish markup.error.sublime_linter|256",
+								"sublime_linter.protected_regions",
+								"SL.mypy.Gutter.|region.orangish markup.error.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/x.png",
+								"SL.mypy.Highlights.|246e5124b1ce957e95febaa2b5e994e3fbabb7cea02f71b3d0b10f911fd2a18c|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|47594efdfe343ae8fe1834c71f4db6e576731b8c555448800556ba6680f5dbf6|region.orangish markup.error.sublime_linter|256",
+								"SL.flake8.Gutter.|region.yellowish markup.warning.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/triangle.png",
+								"SL.flake8.Highlights.|2ef536047c94e1a4133a2223c6c49f43fa2c02c27893ded80df803c79893d4b2|region.yellowish markup.warning.sublime_linter|32",
+								"SL.mypy.Highlights.|08de685fd1fe95f4c70e3ab5e691c9cb6d661551bbaa8531b6c95f4d22eb550d|region.orangish markup.error.sublime_linter|256"
+							],
+							"SL.71.region_keys":
+							[
+								"SL.mypy.Highlights.|6384657a6edcbf021bdf6adb7a438b7fc56831d9cc7a27f041e2d17ed61bd58c|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Gutter.|region.orangish markup.error.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/x.png",
+								"SL.flake8.Gutter.|region.yellowish markup.warning.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/triangle.png",
+								"SL.mypy.Highlights.|246e5124b1ce957e95febaa2b5e994e3fbabb7cea02f71b3d0b10f911fd2a18c|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|7927307fec0e76e4af7a01f05ec6e7824e4825504ab1e98684ea523e5fe939a6|region.orangish markup.error.sublime_linter|256",
+								"SL.flake8.Highlights.|2ef536047c94e1a4133a2223c6c49f43fa2c02c27893ded80df803c79893d4b2|region.yellowish markup.warning.sublime_linter|32",
+								"sublime_linter.protected_regions",
+								"SL.mypy.Highlights.|9305be55bcb1b72801ea4bea5e40a9198b0b2ae6d9ceecb914d514322b685535|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|08de685fd1fe95f4c70e3ab5e691c9cb6d661551bbaa8531b6c95f4d22eb550d|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|47594efdfe343ae8fe1834c71f4db6e576731b8c555448800556ba6680f5dbf6|region.orangish markup.error.sublime_linter|256"
 							],
 							"syntax": "Packages/Python/Python.sublime-syntax"
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 51.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
 					"type": "text"
-				}
-			]
-		},
-		{
-			"selected": 0,
-			"sheets":
-			[
-				{
-					"buffer": 2,
-					"file": "session_management/TCP_client_reascript.py",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 273,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								273,
-								273
-							]
-						],
-						"settings":
-						{
-							"SL.34.region_keys":
-							[
-								"SL.pylint.Highlights.|f0d3c7ba536f3f98bda96598ef2cec6f45c5838874905439f88e7541c95a1864|region.purplish markup.warning.sublime_linter|32",
-								"SL.flake8.Highlights.|5382c1208a4ac2e729c3bf9dccd65d7ca3a0209b32a5026d26357cdfe9d7e105|region.yellowish markup.warning.sublime_linter|32",
-								"SL.pylint.Highlights.|75d89ec2539f85552a2d71167b2ff2268ed65c9c6879d0b81886d2a198ec9638|region.purplish markup.warning.sublime_linter|32",
-								"SL.flake8.Highlights.|80bb8a4e664239f9caa71efaf4d184b65103ded2437f0db71ff12fba1178a800|region.yellowish markup.warning.sublime_linter|1316",
-								"SL.mypy.Highlights.|0efa5671462ea44289c1111e96b60313833afecc256184fd17a78853bf79667a|region.orangish markup.error.sublime_linter|256",
-								"SL.mypy.Gutter.|region.orangish markup.error.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/x.png",
-								"SL.flake8.Gutter.|region.yellowish markup.warning.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/triangle.png",
-								"sublime_linter.protected_regions",
-								"SL.pylint.Gutter.|region.purplish markup.warning.sublime_linter|circle",
-								"SL.pylint.Gutter.|region.purplish markup.error.sublime_linter|circle",
-								"SL.flake8.Highlights.|c2a78e5b9f235d2cdf2a5b235e985c7555c8abefbf0fe3577bf64a544c779d20|region.yellowish markup.warning.sublime_linter|1316",
-								"SL.pylint.Highlights.|ab44594d6a8785f285fea3a17aaf590d4e6793b2be572ea8a63be2fdca779f5e|region.purplish markup.error.sublime_linter|256"
-							],
-							"syntax": "Packages/Python/Python.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
 				},
 				{
-					"buffer": 3,
-					"file": "session_management/networking.py",
+					"buffer": 2,
+					"file": "session_management/test.py",
 					"semi_transient": true,
 					"settings":
 					{
-						"buffer_size": 3867,
+						"buffer_size": 132,
 						"regions":
 						{
 						},
@@ -811,8 +1133,16 @@
 						],
 						"settings":
 						{
-							"SL.36.region_keys":
+							"SL.21.region_keys":
 							[
+								"SL.mypy.Highlights.|75c56c9914d224b3689eb284cfbd5975474143398d3c9901b898948939c57a39|region.orangish markup.error.sublime_linter|256",
+								"SL.flake8.Highlights.|0604629e44ab740e5c8b820d09d53dfbb0cb1a4c3d55d826988db4f391b47ef1|region.yellowish markup.warning.sublime_linter|1316",
+								"SL.flake8.Highlights.|ef8ce37a76c64fc245ce1d05fe859a54c7145878187fd9a9b2a45d378e875e13|region.yellowish markup.warning.sublime_linter|1316",
+								"SL.flake8.Gutter.|region.yellowish markup.warning.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/triangle.png",
+								"SL.mypy.Gutter.|region.orangish markup.error.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/x.png",
+								"SL.flake8.Highlights.|211d9ac0a6a64cb7e8cecbeb2ada7bd1f41493bdccef39754d1990f725afaf97|region.yellowish markup.warning.sublime_linter|1316",
+								"sublime_linter.protected_regions",
+								"SL.flake8.Highlights.|af802ef3bc56fc0f67ef0887c59bf5b368d1b871f06acb1dddc5afeaa3b9626c|region.yellowish markup.warning.sublime_linter|1316"
 							],
 							"syntax": "Packages/Python/Python.sublime-syntax"
 						},
@@ -820,7 +1150,120 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 5,
+					"type": "text"
+				}
+			]
+		},
+		{
+			"selected": 2,
+			"sheets":
+			[
+				{
+					"buffer": 3,
+					"file": "session_management/controller.kv",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 866,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								459,
+								459
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Kivy Language/kv.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "session_management/test_lazy.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1112,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								610,
+								610
+							]
+						],
+						"settings":
+						{
+							"SL.17.region_keys":
+							[
+								"SL.flake8.Highlights.|dfc7c5b3c1239c31d261e25b254454402144b10566749a5a58c4d0f6dd1bb14e|region.yellowish markup.warning.sublime_linter|32",
+								"SL.mypy.Highlights.|bf2cc3d8a28f6ba67aabce1484ea379e77580923c40e3ef5b077ff4d2fab9b57|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|df50b1865ca57f491c3c0705a58151fe5720dfd66a6208920f6d47cc067076c4|region.orangish markup.error.sublime_linter|256",
+								"SL.flake8.Gutter.|region.yellowish markup.warning.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/triangle.png",
+								"SL.mypy.Gutter.|region.orangish markup.error.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/x.png",
+								"sublime_linter.protected_regions"
+							],
+							"SL.72.region_keys":
+							[
+								"SL.flake8.Gutter.|region.yellowish markup.warning.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/triangle.png",
+								"SL.flake8.Highlights.|dfc7c5b3c1239c31d261e25b254454402144b10566749a5a58c4d0f6dd1bb14e|region.yellowish markup.warning.sublime_linter|32",
+								"sublime_linter.protected_regions",
+								"SL.mypy.Highlights.|e25b4307271b95d8b06c21184f96a62a22bb4892783da202a079a4fe39412ebe|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Gutter.|region.orangish markup.error.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/x.png"
+							],
+							"syntax": "Packages/Python/Python.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 408.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "session_management/networking.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4093,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4093,
+								4093
+							]
+						],
+						"settings":
+						{
+							"SL.18.region_keys":
+							[
+							],
+							"SL.19.region_keys":
+							[
+							],
+							"syntax": "Packages/Python/Python.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 1604.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
 					"type": "text"
 				}
 			]
@@ -880,7 +1323,7 @@
 	{
 		"height": 0.0
 	},
-	"pinned_build_system": "Anaconda Python Builder",
+	"pinned_build_system": "",
 	"project": "session-management.sublime-project",
 	"replace":
 	{
@@ -921,21 +1364,6 @@
 	"selected_group": 0,
 	"settings":
 	{
-		"last_automatic_layout":
-		[
-			[
-				0,
-				0,
-				1,
-				1
-			],
-			[
-				1,
-				0,
-				2,
-				1
-			]
-		]
 	},
 	"show_minimap": true,
 	"show_open_files": false,

@@ -2,11 +2,14 @@ import socket as st
 import socketserver as ss
 import json as js
 import typing as ty
+from threading import Thread
+import reapy as rpr
+from common import log
 # import typing_extensions as te
 # from reaper_python import *
 
-DEF_HOST = '127.0.0.1'
-DEF_PORT = 49541
+DEF_HOST: str = '127.0.0.1'
+DEF_PORT: int = 49541
 
 
 def _fill_prefix(prefix: str) -> bytes:
@@ -94,10 +97,7 @@ class SlaveTCPHandler(ss.BaseRequestHandler):
         package = self.request.recv(1024)
         data_type = package[:10].strip(b'0')
         data_size = package[11:20].strip(b'0')
-        # RPR_ShowConsoleMsg(str(data_type) + '\n')
-        # RPR_ShowConsoleMsg(str(data_size) + '\n')
         data = package[20:]
-        # RPR_ShowConsoleMsg(str(data) + '\n')
         data = self._request_data(data, data_size, package)
         response = self._get_response(data_type, data)
         self.request.sendall(response)
@@ -122,8 +122,81 @@ class SlaveTCPHandler(ss.BaseRequestHandler):
         return data
 
 
+class ServerThread(Thread):
+    """Thread, supposing to run socketserver.
+
+    Example:
+        handlers = [PrintHandler, PingHandler]
+        s_server = ReaperServer(handlers, main, host_port=(HOST, PORT))
+        rpr.at_exit(s_server.stop)
+        s_server.start()
+    """
+    def __init__(self, server: ss.ThreadingTCPServer) -> None:
+        super().__init__(daemon=True)
+        self.server = server
+
+    def run(self) -> None:
+        """Start server daemon."""
+        self.server.serve_forever()
+
+
+class ReaperServer:
+    at_exit: ty.Optional[ty.Callable[[], None]]
+
+    def __init__(
+        self,
+        handlers: ty.List[ty.Type[IHandler]],
+        event_loop: ty.Callable[[], None],
+        host_port: ty.Tuple[str, int] = (DEF_HOST, DEF_PORT),
+        at_exit: ty.Optional[ty.Callable[[], None]] = None
+    ) -> None:
+        log('initializing server:')
+        self.host, self.port = host_port
+        self.handler = SlaveTCPHandler
+        for handler in handlers:
+            self.handler.register(handler())
+        self.event_loop = event_loop
+        self.at_exit = at_exit
+        log('creating a TCP server')
+        self.server = ss.ThreadingTCPServer(
+            (self.host, self.port),
+            SlaveTCPHandler,
+            bind_and_activate=False,
+        )
+        self.server.allow_reuse_address = True
+
+        log('creating a TCP server thread')
+        self.server_thread = ServerThread(self.server)
+
+    def start(self) -> None:
+        """Start TCP server and run event loop."""
+        log('starting TCP server')
+        self.server.server_bind()
+        self.server.server_activate()
+        self.server_thread.start()
+        log('running event loop')
+        self._run()
+
+    def stop(self) -> None:
+        """Stop server and cleanup."""
+        log('closing everything')
+        self._cleanup()
+        log('done')
+
+    def _run(self) -> None:
+        self.event_loop()
+        rpr.defer(self._run)
+
+    def _cleanup(self) -> None:
+        self.server.shutdown()
+        self.server.server_close()
+        self.server_thread.join()
+        if self.at_exit is not None:
+            self.at_exit()
+
+
 if __name__ == '__main__':
     test_data = 'test package'
-    test_received = send_data('string', test_data)
+    test_received = send_data('print', test_data)
     print("Sent:     {}".format(test_data))
     print("Received: {}".format(test_received))

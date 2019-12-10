@@ -1,0 +1,116 @@
+
+sock = -123456;
+port = 49541;
+function ReceiveBlock(dest) local(result,str,blocklen)
+(
+	sock>0?(
+		result=tcp_recv(sock, str, 4);
+		result==4?(
+			blocklen=str_getchar(str,0,'iu');
+			blocklen>0?(
+				tcp_set_block(sock,1);
+				result=tcp_recv(sock,dest,blocklen);
+				tcp_set_block(sock,0);
+				result>0?(
+					blocklen;
+				):(
+					dest="";
+					-1;
+				);
+			):(
+				dest="";
+				0;
+			);
+		):(
+			dest="";
+			result<0?(
+				-1;
+			):(
+				result==0?(
+					0;
+				):(
+					sprintf(str,"Incorrect header size %d!\n",result);
+					ShowConsoleMsg(str);
+					-1;
+				);
+			);
+		);
+	):(
+		dest="";
+		-1;
+	);
+);
+
+function SendBlock(block) local(result,str,blocklen)
+(
+	sock>0?(
+		blocklen=strlen(block);
+		str_setchar(str,0,blocklen,'iu');
+		tcp_set_block(sock,1);
+		tcp_send(sock,str,4);
+		tcp_send(sock,block);
+		tcp_set_block(sock,0);
+		0;
+	):(
+		-1;
+	);
+);
+
+function TCP_Reasive()
+(
+	sock<=0?(
+		sock==-123456?(
+			ShowConsoleMsg("Server started!\n");
+			sock=0;
+		);
+		sock=tcp_listen(port,"",#incoming_addr);
+		sock>0?(
+			// sprintf(#str2,"Client %s connected\n",#incoming_addr);
+			// ShowConsoleMsg(#str2);
+			tcp_set_block(sock,0);
+		);
+	);
+	sock>0?(
+		result=ReceiveBlock(#str);
+		result>0?(
+			sprintf(#str2,#str);
+			// ShowConsoleMsg(#str2);
+			SetExtState("Orchestral", "SlaveTempoMark", #str2, 0);
+			// GetExtState(#TimeSignMarker2, "Orchestral1", "SlaveTempoMark1");
+			// ShowConsoleMsg(#TimeSignMarker2);
+			SendBlock("Ok");
+		):(
+			result<0?(
+				// sprintf(#str2,"Error %d, now listening again...\n",result);
+				// ShowConsoleMsg(#str2);
+				tcp_close(sock);
+				tcp_listen_end(port);
+				sock=0;
+			);
+		);
+	);
+);
+
+function TCP_Close()
+(
+	sock>0?(
+		tcp_close(sock);
+	);
+	tcp_listen_end(port);
+	ShowConsoleMsg("Server stopped!\n");
+);
+
+function mainLoop()
+(
+	GetExtState(#main_start, "StartStop", "EEL_TCP");
+
+	strcmp(#main_start, "No")?(
+		defer("mainLoop()");
+	);
+
+	TCP_Reasive();
+);
+
+mainLoop();
+
+atexit("TCP_Close()");

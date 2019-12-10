@@ -1,5 +1,5 @@
 from networking import IHandler
-import reapy as rpr
+from common import log
 
 
 class PrintHandler(IHandler):
@@ -9,7 +9,7 @@ class PrintHandler(IHandler):
         return False
 
     def handle(self, data_type: bytes, data: bytes) -> bytes:
-        rpr.print(str(data, 'utf-8'))
+        log(str(data, 'utf-8'))
         return b'success'
 
 
@@ -20,5 +20,5 @@ class PingHandler(IHandler):
         return False
 
     def handle(self, data_type: bytes, data: bytes) -> bytes:
-        # rpr.print(str(data, 'utf-8'))
+        log(str(data, 'utf-8'))
         return b'success'
