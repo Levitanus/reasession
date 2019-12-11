@@ -100,7 +100,10 @@ class SlaveTCPHandler(ss.BaseRequestHandler):
         data = package[20:]
         data = self._request_data(data, data_size, package)
         response = self._get_response(data_type, data)
-        self.request.sendall(response)
+        try:
+            self.request.sendall(response)
+        except IOError as e:
+            log(e)
 
     def _get_response(self, data_type: bytes, data: bytes) -> bytes:
         response = b''
@@ -157,6 +160,7 @@ class ReaperServer:
             self.handler.register(handler())
         self.event_loop = event_loop
         self.at_exit = at_exit
+        rpr.at_exit(self.stop)
         log('creating a TCP server')
         self.server = ss.ThreadingTCPServer(
             (self.host, self.port),
@@ -188,11 +192,12 @@ class ReaperServer:
         rpr.defer(self._run)
 
     def _cleanup(self) -> None:
+        if self.at_exit is not None:
+            log('perform at_exit')
+            self.at_exit()
         self.server.shutdown()
         self.server.server_close()
         self.server_thread.join()
-        if self.at_exit is not None:
-            self.at_exit()
 
 
 if __name__ == '__main__':

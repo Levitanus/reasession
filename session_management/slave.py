@@ -18,5 +18,5 @@ def main() -> None:
 
 handlers = [PrintHandler, PingHandler]
 s_server = ReaperServer(handlers, main, host_port=(HOST, PORT))
-rpr.at_exit(s_server.stop)
-s_server.start()
+# rpr.at_exit(s_server.stop)
+rpr.defer(s_server.start)
