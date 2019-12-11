@@ -1,86 +1,69 @@
-'''
-Application example using build() + return
-==========================================
-
-An application can be built if you return a widget on build(), or if you set
-self.root.
-'''
-from IPy import IP
+import reapy as rpr
+import reapy.reascript_api as RPR
+from networking import SlaveTCPHandler
+from networking import ReaperServer
+from networking import DEF_HOST
+from networking import DEF_PORT
+import socketserver as ss
 import socket as st
-
-import kivy
-kivy.require('1.0.7')
-
-from kivy.app import App
-from kivy.uix.button import Button
-from kivy.uix.textinput import TextInput
-from kivy.properties import ObjectProperty, StringProperty, ListProperty
-from kivy.uix.boxlayout import BoxLayout
-
+from threading import Thread
+from threading import enumerate as tr_enum
+from threading import main_thread
+from basic_handlers import PrintHandler
+from basic_handlers import PingHandler
+import typing as ty
 from networking import send_data
+from time import sleep
+from common import log
+
+log.enable_print()
+# log.enable_console()
+
+# HOST, PORT = DEF_HOST, DEF_PORT
 
 
-class Slave(BoxLayout):
-    slave_address = ObjectProperty()
-    conn_status = ObjectProperty()
-    projects = ObjectProperty()
+class Pinger:
+    def __init__(self) -> None:
+        self._counter = 0
 
-    def valiadate(self):
-        text = self.slave_address.text
-        if not self._valiadate_ip(text):
-            return self._valiadate_fail()
-            print(text)
+    def run(self) -> None:
+        if self._counter >= 30:
+            self._ping()
+            self._counter = 0
+        self._counter += 1
+
+    def _ping(self) -> None:
+        test_received = ''
         try:
-            recv = send_data('ping', 'ping', text)
-        except st.timeout:
-            return self._valiadate_fail()
-        except ConnectionRefusedError:
-            return self._valiadate_fail()
-        if str(recv.strip()) == 'success':
-            print('right')
-            self.conn_status.text = 'connected'
-
-    def _valiadate_fail(self):
-        self.conn_status.text = 'not connected'
-
-    def _valiadate_ip(self, text):
-        a = text.split('.')
-        if len(a) != 4:
-            return False
-        try:
-            IP(text)
-            print(text)
-            return True
-        except ValueError:
-            return False
-        except BrokenPipeError:
-            return False
+            test_received = send_data('ping', 'ping')
+        except ConnectionRefusedError as e:
+            log(f'slave is dead: {e}')
+            return
+        if test_received:
+            log(f'slave: {test_received.strip()}')
 
 
-class Slaves(kivy.uix.floatlayout.FloatLayout):
-    '''Create a controller that receives a custom widget from the kv lang file.
+pinger = Pinger()
 
-    Add an action to be called from the kv lang file.
-    '''
-    slaves_wid = ObjectProperty()
+HOST, PORT = DEF_HOST, 49542
 
-    slave = ObjectProperty()
-    slaves = ListProperty()
-
-    def action(self):
-        self.slaves.append(Slave())
-        self.slaves_wid.add_widget(self.slaves[-1])
-
-    # def do_action(self):
-    #     self.label_wid.text = 'My label after button press'
-    #     self.info = 'New info text'
+handlers = [PrintHandler, PingHandler]
+gui_server = ReaperServer(HOST, PORT, handlers)
 
 
-class ControllerApp(App):
-    def build(self):
-        # return a Button() as a root widget
-        return Slaves()
+def main_loop() -> None:
+    pinger.run()
+    gui_server.run()
+    if rpr.is_inside_reaper():
+        rpr.defer(main_loop)
+    else:
+        main_loop()
 
 
-if __name__ == '__main__':
-    ControllerApp().run()
+def at_exit() -> None:
+    gui_server.at_exit()
+
+
+print('starting master')
+rpr.at_exit(at_exit)
+main_loop()

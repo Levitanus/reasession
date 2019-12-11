@@ -3,6 +3,11 @@ import socketserver as ss
 import json as js
 import typing as ty
 import typing_extensions as te
+from threading import current_thread
+from threading import Thread
+from threading import main_thread
+from threading import enumerate as tr_enum
+from common import log
 
 DEF_HOST = '127.0.0.1'
 DEF_PORT = 49541
@@ -51,6 +56,7 @@ def send_data(
 
         # Receive data from the server and shut down
         received = str(sock.recv(1024), "utf-8")
+        # sock.close()
     return received
 
 
@@ -89,13 +95,19 @@ class SlaveTCPHandler(ss.BaseRequestHandler):
 
     def handle(self) -> None:
         """Get data from client and process with handlers."""
+        # self.request = st.socket()
+        # conn = self.request.accept()
         package = self.request.recv(1024)
         data_type = package[:10].strip(b'0')
         data_size = package[11:20].strip(b'0')
         data = package[20:]
         data = self._request_data(data, data_size, package)
         response = self._get_response(data_type, data)
+        log('response length:', len(response))
+        log(f'tread: {current_thread()}')
         self.request.sendall(response)
+        self.request.close()
+        log(self.request._closed)
 
     def _get_response(self, data_type: bytes, data: bytes) -> bytes:
         response = b''
@@ -117,8 +129,45 @@ class SlaveTCPHandler(ss.BaseRequestHandler):
         return data
 
 
+class ReaperServer:
+    def __init__(
+        self, host: str, port: int, handlers: ty.List[ty.Type[IHandler]]
+    ) -> None:
+        for handler in handlers:
+            SlaveTCPHandler.register(handler())
+        self._server = ss.TCPServer(
+            (host, port), SlaveTCPHandler, bind_and_activate=False
+        )
+        self._server.timeout = .02
+        self._server.allow_reuse_address = True
+        self._server.server_bind()
+        self._server.server_activate()
+
+    def run(self) -> None:
+        Thread(target=self._server.handle_request).start()
+
+    def at_exit(self) -> None:
+        log('closing master')
+        log('active threads:')
+        for tr in tr_enum():
+            if tr is main_thread():
+                continue
+            log(f'    {tr}')
+        for tr in tr_enum():
+            if tr is main_thread():
+                continue
+            log(f'joining {tr} thread')
+            tr.join(.1)
+            if tr.is_alive():
+                log('timeout')
+        log('closing server')
+        self._server.server_close()
+        log('master closed')
+
+
 if __name__ == '__main__':
+    log.enable_print()
     test_data = 'test package'
-    test_received = send_data('string', test_data)
-    print("Sent:     {}".format(test_data))
-    print("Received: {}".format(test_received))
+    test_received = send_data('ping', 'ping', port=49542)
+    log("Sent:     {}".format(test_data))
+    log("Received: {}".format(test_received))
