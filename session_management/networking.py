@@ -9,8 +9,8 @@ from threading import main_thread
 from threading import enumerate as tr_enum
 from common import log
 
-DEF_HOST = '127.0.0.1'
-DEF_PORT = 49541
+DEF_HOST: str = '127.0.0.1'
+DEF_PORT: int = 49541
 
 
 def _fill_prefix(prefix: str) -> bytes:
@@ -60,7 +60,7 @@ def send_data(
     return received
 
 
-class IHandler(te.Protocol):
+class IHandler:
     """Base class for slave handlers.
 
     can_handle(self, data_type: bytes) -> bool:

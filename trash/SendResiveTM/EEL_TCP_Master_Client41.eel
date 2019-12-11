@@ -1,0 +1,79 @@
+IP="192.168.86.169"; // Для работы на одной машине поставить свой собственный IP
+PORT=49541;
+// ShowConsoleMsg("Now exit!\n");
+
+function ReceiveBlock(dest) local(result,str,blocklen)
+(
+	sock>0?(
+		result=tcp_recv(sock, str, 4);
+		result==4?(
+			blocklen=str_getchar(str,0,'iu');
+			blocklen>0?(
+				tcp_set_block(sock,1);
+				result=tcp_recv(sock,dest,blocklen);
+				tcp_set_block(sock,0);
+				result>0?(
+					blocklen;
+				):(
+					dest="";
+					-1;
+				);
+			):(
+				dest="";
+				0;
+			);
+		):(
+			dest="";
+			result<0?(
+				-1;
+			):(
+				result==0?(
+					0;
+				):(
+					sprintf(str,"Incorrect header size %d!\n",result);
+					ShowConsoleMsg(str);
+					-1;
+				);
+			);
+		);
+	):(
+		dest="";
+		-1;
+	);
+);
+
+function SendBlock(block) local(result,str,blocklen)
+(
+	sock>0?(
+		blocklen=strlen(block);
+		str_setchar(str,0,blocklen,'iu');
+		tcp_set_block(sock,1);
+		tcp_send(sock,str,4);
+		tcp_send(sock,block);
+		tcp_set_block(sock,0);
+		0;
+	):(
+		-1;
+	);
+);
+
+function ReceiveAndPrint() local(str,str2)
+(
+    tcp_set_block(sock,1);
+    ReceiveBlock(str);
+    sprintf(str2,"IN: <%s>\n",str);
+    // ShowConsoleMsg(str2);
+);
+
+sock=tcp_connect(IP, PORT, 1);
+sock>0?
+(
+  // ShowConsoleMsg("Connected!\n");
+	GetExtState(#TimeSignMarker, "Orchestral", "MasterTempoMark");
+	// ShowConsoleMsg(#TimeSignMarker);
+  SendBlock(#TimeSignMarker); ReceiveAndPrint();
+  // ShowConsoleMsg("Now exit!\n");
+  tcp_close(sock);
+):(
+  ShowConsoleMsg("Can't connect!\n");
+);
