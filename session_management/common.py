@@ -60,3 +60,7 @@ class TimeCallback:
             self._count = 0
             return
         self._count += 1
+
+
+def is_stopped() -> bool:
+    return rpr.Project().play_state not in ('play, record')

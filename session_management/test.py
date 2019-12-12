@@ -1,20 +1,8 @@
 from time import sleep
 
-from networking import Discovery
-from networking import DEF_PORT
+from networking import send_data
+from networking import GUI_PORT
 
-
-def callback() -> None:
-    pass
-
-
-disc = Discovery(DEF_PORT, callback)
-
-
-def main() -> None:
-    disc.cb()
-    sleep(.3)
-    main()
-
-
-main()
+send_data(
+    'slave_list', ['127.0.0.1', '192.168.1.2'], port=GUI_PORT, timeout=0.03
+)

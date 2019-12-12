@@ -32,7 +32,11 @@ def _encode_data(data: object) -> bytes:
 
 
 def send_data(
-    type_: str, data: object, host: str = DEF_HOST, port: int = DEF_PORT
+    type_: str,
+    data: object,
+    host: str = DEF_HOST,
+    port: int = DEF_PORT,
+    timeout: float = 0.1
 ) -> str:
     """Send any data to destination slave.
 
@@ -52,7 +56,7 @@ def send_data(
         type_enc = _fill_prefix(type_)
         data_enc = _encode_data(data)
         size = _fill_prefix(str(len(data_enc)))
-        sock.settimeout(0.1)
+        sock.settimeout(timeout)
 
         sock.connect((host, port))
         sock.sendall(type_enc + size + data_enc)
@@ -217,12 +221,15 @@ class Announce:
 class Discovery:
     """Handle requests from slaves and get their IP."""
     def __init__(
-        self, port: int, on_discovery: ty.Callable[..., None]
+        self, port: int, on_discovery: ty.Callable[[str], None]
     ) -> None:
         self._s = st.socket(st.AF_INET, st.SOCK_DGRAM)
         self._s.bind(('', port))
+        self._s.setsockopt(st.SOL_SOCKET, st.SO_REUSEADDR, 1)
         self._s.settimeout(4)
         self._timer = TimeCallback(self._cb, 5)
+        self._on_discovery = on_discovery
+        self._exited = False
 
     def run(self) -> None:
         """Callback to be put in defer loop."""
@@ -232,14 +239,18 @@ class Discovery:
         Thread(target=self._listen).start()
 
     def _listen(self) -> None:
+        if self._exited:
+            return
         try:
-            data, addr = self._s.recvfrom(1024)  #wait for a packet
+            data, addr = self._s.recvfrom(1024)  # wait for a packet
             log.enable_console()
             if data.startswith(ANNOUNCE_STRING):
                 log(
                     "got service announcement from",
                     data[len(ANNOUNCE_STRING):]
                 )
+                # log(addr)
+                self._on_discovery(str(data[len(ANNOUNCE_STRING):], 'utf-8'))
         except st.timeout:
             return
 
@@ -247,6 +258,7 @@ class Discovery:
         """Callback to be put into the at_exit call."""
         log('closing discovery')
         log('active threads:')
+        self._exited = True
         for tr in tr_enum():
             if tr is main_thread():
                 continue

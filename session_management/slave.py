@@ -14,11 +14,10 @@ from threading import Thread
 from basic_handlers import PrintHandler
 from basic_handlers import PingHandler
 from common import log
+from common import is_stopped
 import set_slave_ip
 
 from config import EXT_SECTION, ADDRESS_KEY_SLAVE
-
-from socket import (socket, AF_INET, SOCK_DGRAM, SOL_SOCKET, SO_BROADCAST)
 
 # log.enable_print()
 # log.enable_console()
@@ -42,8 +41,9 @@ announce = Announce(HOST, PORT)
 
 
 def main_loop() -> None:
-    server.run()
-    announce.run()
+    if is_stopped():
+        server.run()
+        announce.run()
     if rpr.is_inside_reaper():
         rpr.defer(main_loop)
     else:

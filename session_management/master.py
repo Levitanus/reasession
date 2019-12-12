@@ -5,37 +5,17 @@ import reapy.reascript_api as RPR
 
 from networking import ReaperServer
 from networking import DEF_HOST, MASTER_PORT, DEF_PORT
-from networking import send_data
 from basic_handlers import PrintHandler
 from basic_handlers import PingHandler
 from common import log
-from common import TimeCallback
+from common import is_stopped
 
-from networking import Discovery
+from slaves import Slaves
 
 log.enable_print()
 # log.enable_console()
 
-
-def ping() -> None:
-    test_received = ''
-    try:
-        test_received = send_data('ping', 'ping')
-    except ConnectionRefusedError as e:
-        log(f'slave is dead: {e}')
-        return
-    if test_received:
-        log(f'slave: {test_received.strip()}')
-
-
-pinger = TimeCallback(ping, time=1)
-
-
-def on_discovery() -> None:
-    pass
-
-
-disc = Discovery(DEF_PORT, on_discovery)
+slaves = Slaves(DEF_PORT)
 
 HOST, PORT = DEF_HOST, MASTER_PORT
 
@@ -44,9 +24,9 @@ gui_server = ReaperServer(HOST, PORT, handlers)
 
 
 def main_loop() -> None:
-    pinger.run()
-    gui_server.run()
-    disc.run()
+    if is_stopped():
+        slaves.run()
+        gui_server.run()
     if rpr.is_inside_reaper():
         rpr.defer(main_loop)
     else:
@@ -55,7 +35,7 @@ def main_loop() -> None:
 
 def at_exit() -> None:
     gui_server.at_exit()
-    disc.at_exit()
+    slaves.at_exit()
 
 
 log('starting master')
