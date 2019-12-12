@@ -2,15 +2,18 @@ import socket as st
 import socketserver as ss
 import json as js
 import typing as ty
-import typing_extensions as te
 from threading import current_thread
 from threading import Thread
 from threading import main_thread
 from threading import enumerate as tr_enum
 from common import log
+from common import TimeCallback
+from config import ANNOUNCE_STRING
 
 DEF_HOST: str = '127.0.0.1'
 DEF_PORT: int = 49541
+MASTER_PORT: int = 49542
+GUI_PORT: int = 49543
 
 
 def _fill_prefix(prefix: str) -> bytes:
@@ -107,7 +110,7 @@ class SlaveTCPHandler(ss.BaseRequestHandler):
         log(f'tread: {current_thread()}')
         self.request.sendall(response)
         self.request.close()
-        log(self.request._closed)
+        # log(self.request._closed)
 
     def _get_response(self, data_type: bytes, data: bytes) -> bytes:
         response = b''
@@ -130,6 +133,25 @@ class SlaveTCPHandler(ss.BaseRequestHandler):
 
 
 class ReaperServer:
+    """TCP server able to run in reascript defer.
+
+    Example:
+        handlers = [PrintHandler, PingHandler]
+        server = ReaperServer(HOST, PORT, handlers)
+
+        def main_loop() -> None:
+            server.run()
+            if rpr.is_inside_reaper():
+                rpr.defer(main_loop)
+            else:
+                main_loop()
+
+        def at_exit() -> None:
+            server.at_exit()
+        if rpr.is_inside_reaper():
+            rpr.at_exit(at_exit)
+        main_loop()
+    """
     def __init__(
         self, host: str, port: int, handlers: ty.List[ty.Type[IHandler]]
     ) -> None:
@@ -140,13 +162,16 @@ class ReaperServer:
         )
         self._server.timeout = .02
         self._server.allow_reuse_address = True
+        log(f'starting server at {host}:{port}')
         self._server.server_bind()
         self._server.server_activate()
 
     def run(self) -> None:
+        """Callback to be put in defer loop."""
         Thread(target=self._server.handle_request).start()
 
     def at_exit(self) -> None:
+        """Has to be put into repy.at_exit."""
         log('closing master')
         log('active threads:')
         for tr in tr_enum():
@@ -163,6 +188,79 @@ class ReaperServer:
         log('closing server')
         self._server.server_close()
         log('master closed')
+
+
+class Announce:
+    """Broadcast ip address once per 5 seconds."""
+    def __init__(self, host: str, port: int) -> None:
+        self._s = st.socket(st.AF_INET, st.SOCK_DGRAM)  # create UDP socket
+        self._s.bind(('', 0))
+        # this is a broadcast socket
+        self._s.setsockopt(st.SOL_SOCKET, st.SO_BROADCAST, 1)
+        self._timer = TimeCallback(self._cb, 5)
+        self._data = ANNOUNCE_STRING
+        self._host = host
+        self._port = port
+
+    def _cb(self) -> None:
+        self._s.sendto(
+            self._data + bytes(self._host, 'utf-8'),
+            ('<broadcast>', self._port)
+        )
+        log("sent service announcement")
+
+    def run(self) -> None:
+        """Has to be put into defer loop."""
+        self._timer.run()
+
+
+class Discovery:
+    """Handle requests from slaves and get their IP."""
+    def __init__(
+        self, port: int, on_discovery: ty.Callable[..., None]
+    ) -> None:
+        self._s = st.socket(st.AF_INET, st.SOCK_DGRAM)
+        self._s.bind(('', port))
+        self._s.settimeout(4)
+        self._timer = TimeCallback(self._cb, 5)
+
+    def run(self) -> None:
+        """Callback to be put in defer loop."""
+        self._timer.run()
+
+    def _cb(self) -> None:
+        Thread(target=self._listen).start()
+
+    def _listen(self) -> None:
+        try:
+            data, addr = self._s.recvfrom(1024)  #wait for a packet
+            log.enable_console()
+            if data.startswith(ANNOUNCE_STRING):
+                log(
+                    "got service announcement from",
+                    data[len(ANNOUNCE_STRING):]
+                )
+        except st.timeout:
+            return
+
+    def at_exit(self) -> None:
+        """Callback to be put into the at_exit call."""
+        log('closing discovery')
+        log('active threads:')
+        for tr in tr_enum():
+            if tr is main_thread():
+                continue
+            log(f'    {tr}')
+        for tr in tr_enum():
+            if tr is main_thread():
+                continue
+            log(f'joining {tr} thread')
+            tr.join(.1)
+            if tr.is_alive():
+                log('timeout')
+        log('closing socket')
+        self._s.close()
+        log('discovery closed')
 
 
 if __name__ == '__main__':

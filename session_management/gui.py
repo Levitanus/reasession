@@ -18,6 +18,7 @@ from kivy.properties import ObjectProperty, StringProperty, ListProperty
 from kivy.uix.boxlayout import BoxLayout
 
 from networking import send_data
+from networking import DEF_HOST, MASTER_PORT, GUI_PORT
 
 
 class Slave(BoxLayout):
@@ -31,7 +32,9 @@ class Slave(BoxLayout):
             return self._valiadate_fail()
             print(text)
         try:
-            recv = send_data('ping', 'ping', text, port=49542)
+            recv = send_data(
+                'ping', 'ping', text, host=DEF_HOST, port=MASTER_PORT
+            )
         except st.timeout:
             return self._valiadate_fail()
         except ConnectionRefusedError:
