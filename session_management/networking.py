@@ -1,14 +1,15 @@
 import socket as st
 import socketserver as ss
-import json as js
+# import json as js
+import pickle as pcl
 import typing as ty
 from threading import current_thread
 from threading import Thread
 from threading import main_thread
 from threading import enumerate as tr_enum
-from common import log
-from common import TimeCallback
-from config import ANNOUNCE_STRING
+from session_management.common import log
+from session_management.common import TimeCallback
+from session_management.config import ANNOUNCE_STRING
 
 DEF_HOST: str = '127.0.0.1'
 DEF_PORT: int = 49541
@@ -18,16 +19,19 @@ GUI_PORT: int = 49543
 
 def _fill_prefix(prefix: str) -> bytes:
     """Fills head of given string by zeros to make it of length 10"""
+    assert len(prefix) <= 10, 'too long prefix'
+    assert prefix, 'no point of making prefix with null string'
     return str(prefix).encode().zfill(10)
 
 
-def _encode_data(data: object) -> bytes:
+def encode_data(data: object) -> bytes:
     if isinstance(data, bytes):
         data_enc = data
     elif isinstance(data, str):
         data_enc = bytes(data, 'utf-8')
     else:
-        data_enc = bytes(js.dumps(data), 'utf-8')
+        # data_enc = bytes(js.dumps(data), 'utf-8')
+        data_enc = pcl.dumps(data)
     return data_enc
 
 
@@ -54,7 +58,7 @@ def send_data(
     with st.socket(st.AF_INET, st.SOCK_STREAM) as sock:
         # Connect to server and send data
         type_enc = _fill_prefix(type_)
-        data_enc = _encode_data(data)
+        data_enc = encode_data(data)
         size = _fill_prefix(str(len(data_enc)))
         sock.settimeout(timeout)
 
@@ -98,6 +102,9 @@ class SlaveTCPHandler(ss.BaseRequestHandler):
     @classmethod
     def register(cls, handler: IHandler) -> None:
         """Register handler to be proceed by server."""
+        assert isinstance(
+            handler, IHandler
+        ), 'accept only instances of IHandler'
         cls._handlers.append(handler)
 
     def handle(self) -> None:
@@ -169,6 +176,9 @@ class ReaperServer:
         log(f'starting server at {host}:{port}')
         self._server.server_bind()
         self._server.server_activate()
+
+    def register_handler(self, handler: IHandler) -> None:
+        SlaveTCPHandler.register(handler)
 
     def run(self) -> None:
         """Callback to be put in defer loop."""

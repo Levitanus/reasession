@@ -13,5 +13,34 @@
 		{
 			"path": "."
 		}
-	]
+	],
+    "settings":
+        {
+            "SublimeLinter.linters.mypy.disable": false,
+            "SublimeLinter.linters.pydocstyle.disable": true,
+            "SublimeLinter.linters.pylint.disable": true,
+            "SublimeLinter.linters.pycodestyle.disable": false,
+            "SublimeLinter.linters.flake8.disable": false,
+
+            "SublimeLinter.linters.mypy.working_dir": 
+                "/home/levitanus/gits/session-management/session_management",
+            // "SublimeLinter.linters.mypy.args": [
+            //     "--disallow-any-expr",
+            //     "--disallow-subclassing-any",
+            //     "--disallow-untyped-calls",
+            //     "--disallow-untyped-defs",
+            //     "--disallow-incomplete-defs",
+            //     "--disallow-untyped-decorators",
+            //     "--warn-redundant-casts",
+            //     "--warn-unused-ignores",
+            //     "--warn-return-any",
+            //     "--warn-unreachable",
+            //     "--show-error-context",
+            //     "--show-column-numbers",
+            // ],
+            "PyTest": {
+                "working_dir": "${folder}/session_management",
+                "options": "--tb=auto -l --cov=session_management --cov-report html --cov-report xml --cov-report term",
+            }
+        }
 }

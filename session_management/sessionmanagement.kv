@@ -1,38 +1,220 @@
+#:import T_tracked_track_direction gui_communicate.T_tracked_track_direction
 <Slave>:
     orientation: 'vertical'
-    slave_address: slave_address
-    conn_status: conn_status
-    projects: projects
-    TextInput:
-        id: slave_address
-        text: 'slave address'
-        multiline: False
-        on_text: root.valiadate()
+    # size_hint_y: None
+    height: 30
+    alpha: 0
+    
+    slave_address: self.slave_address
     Label:
-        id: conn_status
-        text: 'not connected'
+        text: root.slave_address
+        multiline: False
+        color: (0, 0.85, 0.35, 0.8)
+
+<ConnectionStatus@Label>:
+    size_hint_x: None
+    size_hint_y: None
+    width: 10
+    height: 10
+    circle_color: (0.85, 0, 0.35)
+    canvas:
+        Color:
+            rgb: root.circle_color
+            a: 0.8
+        Ellipse:
+            pos: [self.pos[0]-5, self.pos[1] + 7]
+            size: self.size
+
+<SlaveProject>:
+    name: self.name
+    ip: self.ip
+    pos_hint: {'top': 1}
+    size_hint_y: None
+    height: 50
+    alpha: 0
     BoxLayout:
-        id: projects
+        size: root.size
+        pos: root.pos
+        alpha: 0
         orientation: 'vertical'
-<Slaves>:
-    slaves_wid: slaves_widget
-    # slave: Slave
+        Label:
+            text: root.name
+        BoxLayout:
+            alpha: 0
+            Label:
+                text: root.ip
+            ConnectionStatus:
+                circle_color: (0, 0.85, 0.35) if root.connected else (0.85, 0, 0.35)
+    Button:
+        size: (root.size[0], root.size[1]-4)
+        size_hint_y: None
+        pos: (root.pos[0], root.pos[1]+2)
+        background_normal: ''
+        background_color: (42/255, 161/255, 152/255, 0.1)
+        on_press: root.selected()
+    Button:
+        size: 20, 20
+        size_hint: None, None
+        x: root.x+root.width-self.width
+        y: root.y+root.height-self.height-3
+        background_normal: ''
+        background_color: (1, 1, 1, 0.08)
+        border: (0, 0, 0, 0)
+        # pos_hint: {'top_right': None}
+        text: 'x'
+        on_press: root.close()
+
+<SlaveDisconnectedPopup>:
+    asktext:
+        'project is disconnected from master\ndo you want to raise it on %s?' %\
+        self.slave_ip
+    choice: self.choice
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: root.asktext
+        BoxLayout:
+            size_hint_y: None
+            height: 50
+            pos_hint: {'bottom': 0.5}
+            Button:
+                text: 'raise'
+                on_press: root.close('raise')
+            Button:
+                text: 'raise on another slave'
+                on_press: root.close('choose_another')
+            Button:
+                text: 'leave offline'
+                on_press: root.close('leave')
+
+<SlaveProjectRaise2Popup>:
+    asktext:
+        'Where do you want to rise a project?'
+    choice: self.choice
+    BoxLayout:
+        orientation: 'vertical'
+        Spinner:
+            size_hint_y: None
+            height: 50
+            pos_hint: {'bottom': 0.5}
+            values: root.slaves_list
+        Label:
+            text: root.asktext
+
+<TrackedTrack>:
+    orientation: 'horizontal'
+    bg_color: (42/255, 161/255, 152/255)
+    height: 30
+    size_hint_y: None
+    pos_hint: {'top': 1}
+    alpha: 0.1
+
+    master_str: self.master_str
+    slave_str: self.slave_str
+    direction: self.direction
+    conn_type: self.conn_type
+
+    Spinner:
+        size_hint_x: 2.5
+        text: root.master_str
+        values: root.master_str, '120: first_track', '002: second track'
+    Label:
+        text: root.conn_type.value+' =>' if root.direction == T_tracked_track_direction.to_slave else '<= '+root.conn_type.value
+    Spinner:
+        size_hint_x: 2.5
+        text: root.slave_str
+        values: root.slave_str, '120: first_track', '002: second track'
+
+
+
+
+<Main>:
+    slaves: slaves_widget
+    slave_projects: slave_projects
+    tracked_tracks: master_tracks_widget
+    master_project_name: self.master_project_name
+    gui_info: self.gui_info
 
     BoxLayout:
-        # cols: 3
-        padding: 20
-
-        Label:
-            text: 'slave servers:'
-            size_hint_x: None
-            width: 100
+        orientation: 'horizontal'
+        padding: 5
+        
         BoxLayout:
-            id: slaves_widget
-            orientation: 'horizontal'
-            # width: 300
-            Slave
-        Button:
-            text: 'add slave'
-            size_hint_x: None
-            width: 100
-            on_press: root.action()
+            orientation: 'vertical'
+            # cols: 3
+            BoxLayout:
+                orientation: 'vertical'
+
+                Label:
+                    text: 'connected slaves:'
+                    size_hint_y: None
+                    height: 25
+                BoxLayoutLight:
+                    id: slaves_widget
+                    orientation: 'vertical'
+            BoxLayout:
+                orientation: 'vertical'
+                Label:
+                    text: 'globals'
+                    height: 25
+                    size_hint_y: None
+                BoxLayoutLight:
+                    orientation: 'vertical'
+                    Button:
+                        text: 'redraw gui from info'
+                        on_press: root.redraw_gui_from_info()
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_x: 1.5
+            padding: (5, 0)
+
+            Label:
+                text: root.master_project_name
+                height: 25
+                size_hint_y: None
+
+            BoxLayoutLight:
+                ScrollView:
+                    do_scroll_y: True
+                    BoxLayout:
+                        alpha: 0
+                        id: master_tracks_widget
+                        orientation: 'vertical'
+                        pos_hint: {'top': 1}
+                        size_hint_y: None
+                        height: 30
+
+            BoxLayoutLight:
+                orientation: 'horizontal'
+                height: 30
+                size_hint_y: None
+                Button:
+                    id: add_tracked_track
+                    text: 'add track connection'
+        BoxLayout:
+            orientation: 'vertical'
+            # width: 120
+            size_hint_x: 0.75
+            # height: 1000
+            # size_hint_y: None
+            Label:
+                text: 'attached slave projects'
+                height: 25
+                size_hint_y: None
+            BoxLayoutLight
+                orientation: 'vertical'
+                ScrollView:
+                    do_scroll_y: True
+                    BoxLayoutLight:
+                        id: slave_projects
+                        orientation: 'vertical'
+                        height: 100
+                        pos_hint: {'top': 1}
+                        size_hint_y: None
+                        # SlaveProject
+                Button:
+                    text: 'new slave project'
+                    size_hint_y: None
+                    height: 30
+                    on_press: root.add_slave_project()
+                        
