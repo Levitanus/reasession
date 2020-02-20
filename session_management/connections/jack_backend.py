@@ -1,6 +1,7 @@
 import IPy
 import typing as ty
 from os import system
+import subprocess
 
 import jack
 
@@ -19,7 +20,7 @@ class JackBackend(aif.Backend):
             servername=None,
             session_id=None
         )
-        system(init_string)
+        subprocess.Popen(init_string)
         self.client = jack.Client(**init_args)
         self.name = name
 
