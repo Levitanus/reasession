@@ -4,6 +4,7 @@ from os import system
 from time import sleep
 
 import jack
+import reapy as rpr
 
 from . import interface as aif
 
@@ -21,8 +22,11 @@ class JackBackend(aif.Backend):
             session_id=None
         )
         system(init_string)
-        sleep(.1)
-        self.client = jack.Client(**init_args)
+        try:
+            self.client = jack.Client(**init_args)
+        except jack.JackOpenError:
+            sleep(.5)
+            self.client = jack.Client(**init_args)
         self.name = name
 
     def force_connect(self, source: jack.Port, destination: jack.Port) -> None:
@@ -82,9 +86,20 @@ class Connection(aif.Connection):
 
 
 class ConnectionPin(aif.ConnectionPin):
+    def __init__(
+        self, type_: aif.ConnectionType, ip: IPy.IP, project: rpr.Project,
+        track: rpr.Track, backend: JackBackend
+    ) -> None:
+        super().__init__(type_=type_, ip=ip, project=project, track=track)
+        self.backend = backend
+
     @property
     def status(self) -> aif.PinStatus:
-        raise NotImplementedError
+        if not self.is_accessible():
+            return aif.PinStatus.unaccessible
+
+        # with rpr.connect(self.ip.strNormal()):
+        #     pass
 
 
 class ConnectionSource(aif.ConnectionSource, ConnectionPin):

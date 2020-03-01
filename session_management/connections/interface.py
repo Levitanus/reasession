@@ -3,6 +3,7 @@ from enum import IntEnum
 import typing as ty
 import IPy
 import reapy as rpr
+import warnings
 
 
 class ConnectionsError(Exception):
@@ -165,7 +166,7 @@ class ConnectionPin(metaclass=ABCMeta):
     ) -> None:
         self._type = type_
         self._ip = ip
-        self.project = project
+        self._project = project
         self._track = track
 
     @property
@@ -200,6 +201,16 @@ class ConnectionPin(metaclass=ABCMeta):
     @abstractmethod
     def status(self) -> PinStatus:
         raise NotImplementedError
+
+    def is_accessible(self) -> bool:
+        with rpr.connect(self.ip.strNormal()):
+            try:
+                n_tracks = self.project.n_tracks
+                if n_tracks == 0:
+                    return False
+            except rpr.errors.DistError:
+                return False
+        return True
 
 
 class ConnectionSource(ConnectionPin):
