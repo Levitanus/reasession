@@ -1,45 +1,52 @@
+"""Connections realization for using with Jack.
+
+The main flow is
+----------------
+    - get host info
+    - get jack midi ports for each host
+    - match Reaper midi ports to Jack midi ports
+    - match availble master ports to availble slave ports
+    - connect tracks to the appropriate MIDI devices
+
+Currently, backend do not touch Jack connections, just observe.
+
+Attributes
+----------
+CONN_NAME_REGEXP : compilled regexp
+    used by the 'parce_host_name(port: jack.Port)'
+
+"""
+
 import typing as ty
-import typing_extensions as te
 import re
-from abc import ABC, abstractmethod
+import typing_extensions as te
+import jack
 import reapy as rpr
 from reapy import reascript_api as RPR
-import jack
-import warnings
-from session_management import persistence
+from session_management import persistence as prs
 from . import interface as iface
-
-from IPy import IP
 
 CONN_NAME_REGEXP = re.compile(r'(.+):(.+)')
 
 
 class PortNameError(Exception):
-    pass
-
-
-class _PortDump(te.TypedDict):
-    host: str
-    name: str
-    uuid: str
-
-
-class _ReaperPort(te.TypedDict):
-    idx: int
-    name: str
+    """Just in case jack will show unexpected name."""
 
 
 class _JConnection(te.TypedDict):
+
     host: str
     name: str
 
 
 class _JMidiPort(te.TypedDict):
+
     name: str
     connection: _JConnection
 
 
 class _RMidiPort(te.TypedDict):
+
     idx: int
     name: str
 
@@ -49,6 +56,7 @@ _ROutTrack = iface.OutTrack
 
 
 class _HostInfo(te.TypedDict):
+
     host: str
     reaper_in_ports: ty.List[_RMidiPort]
     jack_in_ports: ty.List[_JMidiPort]
@@ -59,18 +67,40 @@ class _HostInfo(te.TypedDict):
 
 
 class _RTrackPort(te.TypedDict):
+
     host: str
     track: rpr.Track
     port: _RMidiPort
 
 
 class _RHostPort(te.TypedDict):
+
     host: str
     port: _RMidiPort
     dest_host: str
 
 
 def parce_port_name(port: jack.Port) -> ty.Tuple[str, str]:
+    """Return tuple from 'jack.Port().name'.
+
+    Parameters
+    ----------
+    port : jack.Port
+
+
+    Returns
+    -------
+    Tuple[str, str]
+        first is host name, second is port name.
+        For example: 'REAPER:Midi Out 1' will be split to
+        ('REAPER', 'Midi Out 1')
+
+    Raises
+    ------
+    PortNameError
+        in case jack gave strange name pattern
+
+    """
     m = re.match(CONN_NAME_REGEXP, port.name)
     if not m:
         raise PortNameError(f'strange port name: {port.name}')
@@ -79,6 +109,22 @@ def parce_port_name(port: jack.Port) -> ty.Tuple[str, str]:
 
 def get_jack_ports_parametrized(want_output: bool = False
                                 ) -> ty.List[_JMidiPort]:
+    """Get all Reraper jack Midi in either out ports in dict.
+
+    Parameters
+    ----------
+    want_output : bool, optional
+        If not set — input ports will be returned
+
+    Returns
+    -------
+    List[_JMidiPort]
+        name: str
+        connection: _JConnection
+            host: str
+            name: str
+
+    """
     is_input = not want_output
     is_output = want_output
     # print(is_input, is_output)
@@ -104,6 +150,14 @@ def get_jack_ports_parametrized(want_output: bool = False
 
 
 def get_jack_ports() -> ty.Tuple[ty.List[_JMidiPort], ty.List[_JMidiPort]]:
+    """Get all Reaper jack Midi ports.
+
+    Returns
+    -------
+    Tuple[ins: List[_JMidiPort], outs: List[_JMidiPort]]
+        See get_jack_ports_parametrized for dict info.
+
+    """
     j_ins = get_jack_ports_parametrized()
     j_outs = get_jack_ports_parametrized(True)
     return j_ins, j_outs
@@ -112,12 +166,34 @@ def get_jack_ports() -> ty.Tuple[ty.List[_JMidiPort], ty.List[_JMidiPort]]:
 def set_track_midi_out(
     track: rpr.Track, out_idx: int, out_ch: int = 0
 ) -> None:
+    """Set Reaper track midi hardware out.
+
+    Parameters
+    ----------
+    track : reapy.Track
+    out_idx : int
+        MIDI device id
+    out_ch : int, optional
+        all channels by default
+
+    """
     CH_BITS = 5
     value = (out_idx << CH_BITS) + out_ch
     RPR.SetMediaTrackInfo_Value(track.id, 'I_MIDIHWOUT', value)  # type:ignore
 
 
 def set_track_midi_in(track: rpr.Track, out_idx: int, out_ch: int = 0) -> None:
+    """Set Reaper track midi hardware input device.
+
+    Parameters
+    ----------
+    track : reapy.Track
+    out_idx : int
+        MIDI device id
+    out_ch : int, optional
+        all channels by default
+
+    """
     MIDI_FLAG = 4096
     CH_BITS = 5
     value = MIDI_FLAG + (out_idx << CH_BITS) + out_ch
@@ -129,6 +205,22 @@ def match_host_ports_parametrized(
     j_ports: ty.List[_JMidiPort],
     hostname: str,
 ) -> ty.List[_RHostPort]:
+    """Match midi devices within ip of their connections.
+
+    Parameters
+    ----------
+    r_ports : List[_RMidiPort]
+        idx: int
+        name: str
+    j_ports : List[_JMidiPort]
+        name: str
+        connection: _JConnection
+            host:str
+            name:str
+    hostname : str
+        localhost or IPV4 address
+
+    """
     out: ty.List[_RHostPort] = []
 
     def validate_name(r_port: _RMidiPort, j_port: _JMidiPort) -> bool:
@@ -161,6 +253,22 @@ def match_host_ports_parametrized(
 
 def match_host_ports(host: _HostInfo
                      ) -> ty.Tuple[ty.List[_RHostPort], ty.List[_RHostPort]]:
+    """Match Jack and Reaper Midi ports from different hosts to simple list.
+
+    Parameters
+    ----------
+    host : _HostInfo
+        can be made by 'update_host_info(interface.HostInfo)'
+
+    Returns
+    -------
+    Tuple[ins: List[_RHostPort], outs: List[_RHostPort]]
+        _RHostPort:
+            host: str
+            port _RMidiPort
+            dest_host: str
+
+    """
     r_in_ports = host['reaper_in_ports']
     j_in_ports = host['jack_in_ports']
     r_out_ports = host['reaper_out_ports']
@@ -182,6 +290,19 @@ def match_host_ports(host: _HostInfo
 def get_connection_task(
     hosts: ty.Sequence[_HostInfo]
 ) -> ty.Tuple[ty.List[_RTrackPort], ty.List[_RTrackPort]]:
+    """Make task from _HostInfo.
+
+    Rsult is attempted to be used in one for-loop cycle.
+
+    Parameters
+    ----------
+    hosts : Sequence[_HostInfo]
+
+    Returns
+    -------
+        Tuple[out_tracks: _RTrackPort, in_tracks: _RTrackPort]
+
+    """
     midi_outs: ty.List[_RTrackPort] = []
     midi_ins: ty.List[_RTrackPort] = []
 
@@ -217,6 +338,14 @@ def get_connection_task(
 def connect_by_task(
     task: ty.Tuple[ty.List[_RTrackPort], ty.List[_RTrackPort]]
 ) -> None:
+    """Make a final connection of all tracks.
+
+    Parameters
+    ----------
+    task: Tuple[out_tracks: List[_RTrackPort], in_tracks: List[_RTrackPort]]
+        see 'get_connections_task(hosts)'
+
+    """
     for i_port in task[0]:
         with rpr.connect(i_port['host']):
             with i_port['track'].project.make_current_project():
@@ -228,12 +357,111 @@ def connect_by_task(
 
 
 def get_host_jack_ports(
-    host: str
+    host: ty.Optional[str] = None
 ) -> ty.Tuple[ty.List[_JMidiPort], ty.List[_JMidiPort]]:
+    """Return all Jack midi ports of Reaper on the specified host.
+
+    Note
+    ----
+    reascript 'Levitanus: (session_management) get_system_jack_ports'
+    has to be registered in action editor.
+
+    Parameters
+    ----------
+    host : Optional[str], optional
+        'localhost' or IPV4 address
+
+    Returns
+    -------
+    jack_in_ports: _JMidiPort
+    jack_out_ports _JMidiPort
+
+    """
+    if host == 'localhost':
+        host = None
     with rpr.connect(host):
         with rpr.inside_reaper():
             a_id = RPR.NamedCommandLookup(
                 '_RSc3a0868bee74abaf333ac661af9a4a27257c37c1'
             )
             rpr.perform_action(a_id)
-            return prs.loads('slave_ports')
+            ports = prs.loads('slave_ports')
+            # print(ports)
+            return ports
+
+
+def get_host_midi_ports(
+    host: ty.Optional[str] = None
+) -> ty.Tuple[ty.List[_RMidiPort], ty.List[_RMidiPort]]:
+    """Get all MIDI devices of the particular host.
+
+    Parameters
+    ----------
+    host : Optional[str], optional
+        'localhost' or IPV4 address
+
+    Returns
+    -------
+    jack_in_ports: _JMidiPort
+    jack_out_ports _JMidiPort
+
+    """
+    if host == 'localhost':
+        host = None
+
+    ins, outs = [], []
+    with rpr.connect(host):
+        with rpr.inside_reaper():
+            for i, port in enumerate(rpr.midi.get_input_names()):
+                ins.append(_RMidiPort(idx=i, name=port))
+            for i, port in enumerate(rpr.midi.get_output_names()):
+                outs.append(_RMidiPort(idx=i, name=port))
+    return ins, outs
+
+
+def update_host_info(hosts: ty.List[iface.HostInfo]) -> ty.List[_HostInfo]:
+    """Make backend-specific host info from the given one.
+
+    Parameters
+    ----------
+    hosts : List[interface.HostInfo]
+        ip and list of in and out tracks
+
+    Returns
+    -------
+    List[_HostInfo]
+        ip, list of tracks and list of midi ports
+
+    """
+    hosts_new: ty.List[_HostInfo] = []
+    for host in hosts:
+        jack_in_ports, jack_out_ports = get_host_jack_ports(host['host'])
+        reaper_in_ports, reaper_out_ports = get_host_midi_ports(host['host'])
+        hosts_new.append(
+            _HostInfo(
+                host=host['host'],
+                in_tracks=host['in_tracks'],
+                out_tracks=host['out_tracks'],
+                jack_in_ports=jack_in_ports,
+                jack_out_ports=jack_out_ports,
+                reaper_in_ports=reaper_in_ports,
+                reaper_out_ports=reaper_out_ports,
+            )
+        )
+    return hosts_new
+
+
+class Connector(iface.Connector):
+    """Concrete Connector realization.
+
+    Accepts HostInfo and connects tracks by Jack backend
+    """
+
+    def connect_all(self) -> None:
+        """Call by the class user.
+
+        Connect all given via HostInfo tracks to each other, using Jack backend
+        """
+        host_info = update_host_info(self.hosts)
+        task = get_connection_task(host_info)
+        connect_by_task(task)

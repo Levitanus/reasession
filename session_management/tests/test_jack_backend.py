@@ -448,10 +448,6 @@ def test_get_jack_ports(monkeypatch):
     assert response == test_response
 
 
-def test_get_host_ports(monkeypatch):
-    result = bck.get_host_ports('localhost')
-
-
 # def test_fill_host_info(monkeypatch):
 #     ...
 

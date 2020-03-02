@@ -16,9 +16,11 @@
 	],
     "settings":
         {
+            // "src_root": "./session_management",
             "SublimeLinter.linters.mypy.disable": false,
-            "SublimeLinter.linters.pydocstyle.disable": true,
-            "SublimeLinter.linters.pylint.disable": true,
+            "SublimeLinter.linters.pydocstyle.disable": false,
+            // "SublimeLinter.linters.pydocstyle.disable": true,
+            // "SublimeLinter.linters.pylint.disable": true,
             "SublimeLinter.linters.pycodestyle.disable": false,
             "SublimeLinter.linters.flake8.disable": false,
 

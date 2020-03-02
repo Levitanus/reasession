@@ -15,4 +15,5 @@ def dumps(key: str, data: object, persist: bool = False) -> None:
 
 def loads(key: str) -> object:
     dump = rpr.get_ext_state(SECTION, key)
+    # print('dump = ', dump)
     return pickle.loads(codecs.decode(dump.encode(), "base64"))
