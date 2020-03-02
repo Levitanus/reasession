@@ -233,7 +233,7 @@ def get_host_jack_ports(
     with rpr.connect(host):
         with rpr.inside_reaper():
             a_id = RPR.NamedCommandLookup(
-                '_RSd998e996a6ce8d0edf5efb3a68c86790e67cd3b4'
+                '_RSc3a0868bee74abaf333ac661af9a4a27257c37c1'
             )
             rpr.perform_action(a_id)
             return prs.loads('slave_ports')
