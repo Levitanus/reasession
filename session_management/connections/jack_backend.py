@@ -627,6 +627,12 @@ class Connector(iface.Connector):
     """Concrete Connector realization.
 
     Accepts HostInfo and connects tracks by Jack backend
+
+    Init Parameters
+    ---------------
+    hosts : List[HostInfo]
+            see interface.HostInfo
+
     """
 
     def connect_all(self) -> None:

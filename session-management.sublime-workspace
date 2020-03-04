@@ -4,6 +4,58 @@
 		"selected_items":
 		[
 			[
+				"Midi",
+				"MidiBus\tstatement"
+			],
+			[
+				"out",
+				"out_track\tstatement"
+			],
+			[
+				"pro",
+				"project"
+			],
+			[
+				"Slave",
+				"SlaveInstTrack"
+			],
+			[
+				"Inst",
+				"SlaveInstTrack"
+			],
+			[
+				"NotImple",
+				"NotImplementedError\tclass"
+			],
+			[
+				"con",
+				"connect_all\tfunction"
+			],
+			[
+				"conn",
+				"connector\tstatement"
+			],
+			[
+				"Sessi",
+				"SessionFile"
+			],
+			[
+				"NotIm",
+				"NotImplementedError\tclass"
+			],
+			[
+				"Master",
+				"MasterOutTrack\tclass"
+			],
+			[
+				"uu",
+				"uuid4\tfunction"
+			],
+			[
+				"Conn",
+				"Connector\tclass"
+			],
+			[
 				"_R",
 				"_RTrackPort\tclass"
 			],
@@ -26,10 +78,6 @@
 			[
 				"match",
 				"match_hosts_ports"
-			],
-			[
-				"conn",
-				"ConnectionsError\tclass"
 			],
 			[
 				"Co",
@@ -60,10 +108,6 @@
 				"reaper_in_ports"
 			],
 			[
-				"out",
-				"out_tracks"
-			],
-			[
 				"get",
 				"get_host_jack_ports\tfunction"
 			],
@@ -78,10 +122,6 @@
 			[
 				"from",
 				"from_list\tparam"
-			],
-			[
-				"con",
-				"connections\tstatement"
 			],
 			[
 				"connectio",
@@ -246,10 +286,6 @@
 			[
 				"ports",
 				"ports_used\tstatement"
-			],
-			[
-				"pro",
-				"property\tNew Property"
 			],
 			[
 				"Conte",
@@ -452,10 +488,6 @@
 				"JackErrorCode\tclass"
 			],
 			[
-				"Conn",
-				"ConnectionDest"
-			],
-			[
 				"int",
 				"IntEnum\tclass"
 			],
@@ -482,38 +514,6 @@
 			[
 				"bye",
 				"bytes\tclass"
-			],
-			[
-				"std",
-				"stdout\tinstance"
-			],
-			[
-				"Ru",
-				"runtime_checkable\tfunction"
-			],
-			[
-				"assertIs",
-				"assertIsInstance\tfunction"
-			],
-			[
-				"_ca",
-				"_cashed_result\tstatement"
-			],
-			[
-				"cal",
-				"callback\tparam"
-			],
-			[
-				"set",
-				"setattr\tfunction"
-			],
-			[
-				"track",
-				"tracking_interval\tparam"
-			],
-			[
-				"skip",
-				"skipIf\tfunction"
 			]
 		]
 	},
@@ -523,7 +523,7 @@
 			"file": "session_management/connections/jack_backend.py",
 			"settings":
 			{
-				"buffer_size": 17113,
+				"buffer_size": 17217,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -546,22 +546,19 @@
 			}
 		},
 		{
-			"contents": "from session_management.connections.jack_backend import Connector\n\n\n",
 			"file": "session_management/simple_test.py",
-			"file_size": 66,
-			"file_write_time": 132278250013326590,
 			"settings":
 			{
-				"buffer_size": 68,
+				"buffer_size": 0,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "session_management/tests/test_jack_backend.py",
+			"file": "session_management/session.py",
 			"settings":
 			{
-				"buffer_size": 18546,
+				"buffer_size": 3555,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -891,6 +888,8 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"HostIp",
+			"c_iface",
 			"\"\"\"Summary\n    \"\"\"",
 			"o_host",
 			"o_track['slave']['host']",
@@ -1016,9 +1015,7 @@
 			"background_color",
 			"BackgroundLabel",
 			"ObjectProperty",
-			"=",
-			"StringProperty",
-			"button"
+			"="
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -1050,31 +1047,31 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 17113,
+						"buffer_size": 17217,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								16254,
-								16254
+								16585,
+								16585
 							]
 						],
 						"settings":
 						{
 							"SL.14.region_keys":
 							[
-								"SL.mypy.Highlights.|6638510b9c1f7d041134b2c3bb8d1002dd2bc4047b030040a3852bc1a1c74d9c|region.orangish markup.error.sublime_linter|256",
-								"SL.mypy.Highlights.|56b372f259b0d860e1211e66eec2405ea05095e7770447cd8ab8d995251b7631|region.orangish markup.error.sublime_linter|256",
 								"sublime_linter.protected_regions",
-								"SL.mypy.Highlights.|a66510a9806605a382066181b8fa03e81409736d7cb265e3253516915c583036|region.orangish markup.error.sublime_linter|256",
 								"SL.mypy.Highlights.|0404f2ba5ad2031c74086ba71500a4ae5a5919eba71e4dde56c2a1118f3b348a|region.orangish markup.error.sublime_linter|256",
-								"SL.mypy.Highlights.|f221bda08988e1f875635c450853ef7160c9c98984313242b128d9687b13453f|region.orangish markup.error.sublime_linter|256",
-								"SL.mypy.Highlights.|2ff7e2be2c476cd4a53d307565600ccd1d9c740fa1658f5c5c3dc622e3d43a4f|region.orangish markup.error.sublime_linter|256",
-								"SL.mypy.Highlights.|26a52a233431c0c291193628ffe87b75b074263132814ec4a1ea898c1502cc3b|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|56b372f259b0d860e1211e66eec2405ea05095e7770447cd8ab8d995251b7631|region.orangish markup.error.sublime_linter|256",
 								"SL.mypy.Gutter.|region.orangish markup.error.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/x.png",
-								"SL.mypy.Highlights.|bd552056fdc008f525438a465c7a73f522392bfebb699d358d34a38da23bf760|region.orangish markup.error.sublime_linter|256"
+								"SL.mypy.Highlights.|a66510a9806605a382066181b8fa03e81409736d7cb265e3253516915c583036|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|2ff7e2be2c476cd4a53d307565600ccd1d9c740fa1658f5c5c3dc622e3d43a4f|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|6638510b9c1f7d041134b2c3bb8d1002dd2bc4047b030040a3852bc1a1c74d9c|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|bd552056fdc008f525438a465c7a73f522392bfebb699d358d34a38da23bf760|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|f221bda08988e1f875635c450853ef7160c9c98984313242b128d9687b13453f|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|26a52a233431c0c291193628ffe87b75b074263132814ec4a1ea898c1502cc3b|region.orangish markup.error.sublime_linter|256"
 							],
 							"SL.28.region_keys":
 							[
@@ -1106,10 +1103,10 @@
 							"syntax": "Packages/Python/Python.sublime-syntax"
 						},
 						"translation.x": 0.0,
-						"translation.y": 10211.0,
+						"translation.y": 10313.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 3,
 					"type": "text"
 				},
 				{
@@ -1250,7 +1247,7 @@
 			]
 		},
 		{
-			"selected": 0,
+			"selected": 1,
 			"sheets":
 			[
 				{
@@ -1259,26 +1256,22 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 68,
+						"buffer_size": 0,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								63,
-								63
+								0,
+								0
 							]
 						],
 						"settings":
 						{
 							"SL.17.region_keys":
 							[
-								"SL.flake8.Gutter.|region.yellowish markup.warning.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/triangle.png",
-								"SL.pycodestyle.Gutter.|region.greenish markup.warning.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/pointer.png",
-								"SL.pycodestyle.Highlights.|6f0385b4a536c87d63d84ee31bfdff13e194659947221ed9a7d8c9d9c6d1b4a6|region.greenish markup.warning.sublime_linter|32",
-								"sublime_linter.protected_regions",
-								"SL.flake8.Highlights.|7505836b4adad0eaf52b11a6ea634afb6c6acd256b4aad52db5fdedc1610ba1e|region.yellowish markup.warning.sublime_linter|1316"
+								"sublime_linter.protected_regions"
 							],
 							"SL.18.region_keys":
 							[
@@ -1337,39 +1330,50 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 1,
 					"type": "text"
 				},
 				{
 					"buffer": 4,
-					"file": "session_management/tests/test_jack_backend.py",
+					"file": "session_management/session.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 18546,
+						"buffer_size": 3555,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1738,
-								1738
+								1098,
+								1098
 							]
 						],
 						"settings":
 						{
-							"SL.20.region_keys":
+							"SL.23.region_keys":
 							[
-								"sublime_linter.protected_regions"
+								"sublime_linter.protected_regions",
+								"SL.mypy.Highlights.|b1aefa3fa462493f6521acdb980587235c73d605e11439f40e9c7b12df0bad5b|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Gutter.|region.orangish markup.error.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/x.png",
+								"SL.flake8.Gutter.|region.yellowish markup.error.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/triangle.png",
+								"SL.flake8.Highlights.|23f8ce26381b32c740be242b397d6ce2fc3eb66b71fbf93709c9a0354992d866|region.yellowish markup.warning.sublime_linter|32",
+								"SL.mypy.Highlights.|00f2efb9e69d7102eea7d8ef45bb426c75b478e2804c083d9994d4cdf277c742|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|9f02c487cc3d9218503624d4c4600fbd7fb93765ad567e71d716b83e9b9a1a3d|region.orangish markup.error.sublime_linter|256",
+								"SL.flake8.Highlights.|1bf5d81ca06fe42805218c21cd7b144cee6df328533491a65bce71dfe7158528|region.yellowish markup.error.sublime_linter|804",
+								"SL.flake8.Gutter.|region.yellowish markup.warning.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/triangle.png",
+								"SL.mypy.Highlights.|61bea11c1fc0c36bf9a03c46a127e490ae6b6f5408aa75be5a831ceb2108df3b|region.orangish markup.error.sublime_linter|256",
+								"SL.flake8.Highlights.|bfc4ee19b357e9afdd2f9284436fd66caddcf1f0553c3cda382ad49a798bd285|region.yellowish markup.error.sublime_linter|804",
+								"SL.flake8.Highlights.|7c2ce802c37b83e9f6b88b21938c45ce550e23342cbaae18cd6a7161ec5a7104|region.yellowish markup.warning.sublime_linter|1316"
 							],
 							"syntax": "Packages/Python/Python.sublime-syntax"
 						},
 						"translation.x": 0.0,
-						"translation.y": 826.0,
+						"translation.y": 146.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 0,
 					"type": "text"
 				},
 				{

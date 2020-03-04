@@ -1,1 +1,2 @@
-from session_management.connections.jack_backend import Connector
+t = {}
+print(hasattr(t, 'key'))

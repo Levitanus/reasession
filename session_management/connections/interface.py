@@ -101,8 +101,6 @@ class Connector(ABC):
         Parameters
         ----------
         hosts : List[HostInfo]
-            Description
-        hosts : List[HostInfo]
 
         """
         self._hosts = hosts
