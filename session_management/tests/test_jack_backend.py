@@ -1,15 +1,11 @@
-from socket import socket
 import typing as ty
+from random import randint
 import pytest as pt
+import mock
+import jack
 import reapy as rpr
-from reapy import reascript_api as RPR
-from IPy import IP
 from ..connections import jack_backend as bck
 from ..connections import interface as iface
-import mock
-from warnings import warn
-import jack
-from random import randint
 
 
 class MonkeyTrack():
@@ -17,22 +13,21 @@ class MonkeyTrack():
     def __init__(
         self,
         id: ty.Union[str, int] = None,
-        project: ty.Optional[rpr.Project] = None
+        project: ty.Optional[rpr.Project] = None,
+        name: ty.Optional[str] = None
     ) -> None:
         self.id = id
         self.project = project
+        self.name = name if name else id
 
     def __repr__(self) -> str:
         return f'(MediaTrack id={self.id}, project={self.project})'
 
     def __eq__(self, other: object) -> bool:
-        # print('cmp called')
         if not isinstance(other, MonkeyTrack):
-            # raise RuntimeError('not equal')
             return False
         if other.id == self.id:
             return True
-        # raise RuntimeError('not equal')
         return False
 
 
@@ -282,13 +277,6 @@ def get_test_data(
     ]
     midi_ins: ty.List[bck._RTrackPort] = [
         dict(
-            host='localhost',
-            track=rpr.Track(
-                id='slave_track_1', project=rpr.Project(id='slave_project_1')
-            ),
-            port=dict(idx=2, name='MIDI Input 3')
-        ),
-        dict(
             host='192.168.2.2',
             track=rpr.Track(
                 id='slave_track_2', project=rpr.Project(id='slave_project_2')
@@ -308,6 +296,13 @@ def get_test_data(
                 id='slave_track_4', project=rpr.Project(id='slave_project_3')
             ),
             port=dict(idx=2, name='system:midi_capture_3'),
+        ),
+        dict(
+            host='localhost',
+            track=rpr.Track(
+                id='slave_track_1', project=rpr.Project(id='slave_project_1')
+            ),
+            port=dict(idx=2, name='MIDI Input 3')
         ),
     ]
     return master, slave, midi_outs, midi_ins
@@ -457,10 +452,6 @@ def test_get_jack_ports(monkeypatch):
     assert response == test_response
 
 
-# def test_fill_host_info(monkeypatch):
-#     ...
-
-
 def test_get_connection_task(monkeypatch):
     monkeypatch.setattr(rpr, 'Track', MonkeyTrack)
     monkeypatch.setattr(rpr, 'Project', MonkeyProject)
@@ -470,7 +461,6 @@ def test_get_connection_task(monkeypatch):
     assert t_midi_ins == r_midi_ins
     assert t_midi_outs == r_midi_outs
     out = t_master['jack_out_ports'].pop()
-    # print(t_master['jack_out_ports'][5])
     with pt.raises(iface.ConnectionsError):
         bck.get_connection_task([t_master, t_slave])
     t_master['jack_out_ports'].append(out)
@@ -564,9 +554,6 @@ def test_connect(
     set_track_midi_out, set_track_midi_in, monkey_connect, MonkeyTrack,
     MonkeyProject
 ):
-    warn(UserWarning('TODO: add exception if not enougth system ports'))
-    # t_master, t_slave, t_midi_outs, t_midi_ins = get_test_data()
-    # task = bck.get_connection_task([t_master, t_slave])
     track = rpr.Track(
         id='slave_track_2', project=rpr.Project(id='slave_project_2')
     )

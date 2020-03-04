@@ -90,7 +90,7 @@ def parce_port_name(port: jack.Port) -> ty.Tuple[str, str]:
 
     Returns
     -------
-    Tuple[str, str]
+    ty.Tuple[str, str]
         first is host name, second is port name.
         For example: 'REAPER:Midi Out 1' will be split to
         ('REAPER', 'Midi Out 1')
@@ -118,7 +118,7 @@ def get_jack_ports_parametrized(want_output: bool = False
 
     Returns
     -------
-    List[_JMidiPort]
+    ty.List[_JMidiPort]
         name: str
         connection: _JConnection
             host: str
@@ -154,7 +154,7 @@ def get_jack_ports() -> ty.Tuple[ty.List[_JMidiPort], ty.List[_JMidiPort]]:
 
     Returns
     -------
-    Tuple[ins: List[_JMidiPort], outs: List[_JMidiPort]]
+    Tuple[ins : ty.Tuple[ty.List[_JMidiPort], ty.List[_JMidiPort]]
         See get_jack_ports_parametrized for dict info.
 
     """
@@ -170,11 +170,13 @@ def set_track_midi_out(
 
     Parameters
     ----------
-    track : reapy.Track
+    track : rpr.Track
+        Description
     out_idx : int
         MIDI device id
     out_ch : int, optional
         all channels by default
+    track : reapy.Track
 
     """
     CH_BITS = 5
@@ -187,11 +189,13 @@ def set_track_midi_in(track: rpr.Track, out_idx: int, out_ch: int = 0) -> None:
 
     Parameters
     ----------
-    track : reapy.Track
+    track : rpr.Track
+        Description
     out_idx : int
         MIDI device id
     out_ch : int, optional
         all channels by default
+    track : reapy.Track
 
     """
     MIDI_FLAG = 4096
@@ -209,10 +213,10 @@ def match_host_ports_parametrized(
 
     Parameters
     ----------
-    r_ports : List[_RMidiPort]
+    r_ports : ty.List[_RMidiPort]
         idx: int
         name: str
-    j_ports : List[_JMidiPort]
+    j_ports : ty.List[_JMidiPort]
         name: str
         connection: _JConnection
             host:str
@@ -224,6 +228,18 @@ def match_host_ports_parametrized(
     out: ty.List[_RHostPort] = []
 
     def validate_name(r_port: _RMidiPort, j_port: _JMidiPort) -> bool:
+        """Check if Reaper midi port is valid jack port.
+
+        Parameters
+        ----------
+        r_port : _RMidiPort
+        j_port : _JMidiPort
+
+        Returns
+        -------
+        bool
+
+        """
         if r_port['name'] == j_port['name']:
             return True
         if r_port['name'].startswith(j_port['connection']['host']):
@@ -251,8 +267,10 @@ def match_host_ports_parametrized(
     return out
 
 
-def match_host_ports(host: _HostInfo
-                     ) -> ty.Tuple[ty.List[_RHostPort], ty.List[_RHostPort]]:
+_HostPortsMatched = ty.Tuple[ty.List[_RHostPort], ty.List[_RHostPort]]
+
+
+def match_host_ports(host: _HostInfo) -> _HostPortsMatched:
     """Match Jack and Reaper Midi ports from different hosts to simple list.
 
     Parameters
@@ -262,7 +280,7 @@ def match_host_ports(host: _HostInfo
 
     Returns
     -------
-    Tuple[ins: List[_RHostPort], outs: List[_RHostPort]]
+    Tuple[ins : _HostPortsMatched
         _RHostPort:
             host: str
             port _RMidiPort
@@ -287,6 +305,66 @@ def match_host_ports(host: _HostInfo
     return ins, outs
 
 
+def match_hosts_ports(hosts: ty.Sequence[_HostInfo]
+                      ) -> ty.Dict[str, _HostPortsMatched]:
+    """Call math_host_ports on every host in list.
+
+    Parameters
+    ----------
+    hosts : ty.Sequence[_HostInfo]
+
+    Returns
+    -------
+    ty.Dict[str, _HostPortsMatched]
+        key is host IP
+
+    """
+    ports: ty.Dict[str, _HostPortsMatched] = {}
+    for host in hosts:
+        ports[host['host']] = match_host_ports(host=host)
+    return ports
+
+
+def get_hosts_out_tracks(hosts: ty.Sequence[_HostInfo]
+                         ) -> ty.Dict[str, ty.List[_ROutTrack]]:
+    """Extract out_tracks list from host info.
+
+    Parameters
+    ----------
+    hosts : ty.Sequence[_HostInfo]
+
+    Returns
+    -------
+    ty.Dict[str, ty.List[_ROutTrack]]
+        key is host IP
+
+    """
+    tracks = {}
+    for host in hosts:
+        tracks[host['host']] = host['out_tracks']
+    return tracks
+
+
+def get_hosts_in_tracks(hosts: ty.Sequence[_HostInfo]
+                        ) -> ty.Dict[str, ty.List[rpr.Track]]:
+    """Extract in_tracks list from host info.
+
+    Parameters
+    ----------
+    hosts : ty.Sequence[_HostInfo]
+
+    Returns
+    -------
+    ty.Dict[str, ty.List[rpr.Track]]
+        key is host IP
+
+    """
+    tracks = {}
+    for host in hosts:
+        tracks[host['host']] = host['in_tracks']
+    return tracks
+
+
 def get_connection_task(
     hosts: ty.Sequence[_HostInfo]
 ) -> ty.Tuple[ty.List[_RTrackPort], ty.List[_RTrackPort]]:
@@ -296,56 +374,137 @@ def get_connection_task(
 
     Parameters
     ----------
+    hosts : ty.Sequence[_HostInfo]
+        Description
     hosts : Sequence[_HostInfo]
 
     Returns
-    -------
-        Tuple[out_tracks: _RTrackPort, in_tracks: _RTrackPort]
+    ------------------
+    Tuple[out_tracks: _RTrackPort, in_tracks: _RTrackPort]
 
     """
     midi_outs: ty.List[_RTrackPort] = []
     midi_ins: ty.List[_RTrackPort] = []
-    miss_in_ports_msg = "not enough in ports for host '%s'"
-    miss_out_ports_msg = "not enough out ports for host '%s'"
 
-    for host in hosts:
-        hostname = host['host']
-        h_ports_in, h_ports_out = match_host_ports(host)
-        for track in host['in_tracks']:
-            assigned = False
-            for idx, port in enumerate(h_ports_in):
-                if port['dest_host'] == 'localhost':
-                    midi_ins.append(
-                        {
-                            'host': hostname,
-                            'track': track,
-                            'port': h_ports_in.pop(idx)['port']
-                        }
-                    )
-                    assigned = True
-                    break
-
-            if not assigned:
-                raise iface.ConnectionsError(miss_in_ports_msg % host['host'])
-        for o_track in host['out_tracks']:
-            assigned = False
-            for idx, port in enumerate(h_ports_out):
-                if port['dest_host'] == o_track['slave']['host']:
-                    midi_outs.append(
-                        {
-                            'host': hostname,
-                            'track': o_track['track'],
-                            'port': h_ports_out.pop(idx)['port']
-                        }
-                    )
-                    assigned = True
-                    break
-            if not assigned:
-                raise iface.ConnectionsError(
-                    miss_out_ports_msg % o_track['slave']['host']
-                )
+    hosts_ports: ty.Dict[str, _HostPortsMatched] = match_hosts_ports(hosts)
+    hosts_out_tracks: ty.Dict[str, ty.
+                              List[_ROutTrack]] = get_hosts_out_tracks(hosts)
+    hosts_in_tracks: ty.Dict[str, ty.List[rpr.
+                                          Track]] = get_hosts_in_tracks(hosts)
+    for o_host, o_tracks in hosts_out_tracks.items():
+        for o_track in o_tracks:
+            # str, rpr.Track
+            i_host, i_track = _match_slave_track(o_track, hosts_in_tracks)
+            # !UNCLEAN lists will be modified!
+            _pop_out_port(hosts_ports, o_host, i_host, o_track, midi_outs)
+            # !UNCLEAN lists will be modified!
+            _pop_in_ports(hosts_ports, i_host, i_track, midi_ins)
 
     return midi_outs, midi_ins
+
+
+def _pop_in_ports(
+    hosts_ports: ty.Dict[str, _HostPortsMatched], i_host: str,
+    i_track: rpr.Track, midi_ins: ty.List[_RTrackPort]
+) -> None:
+    """Pop reaper midi port from host info and put into the midi_ins.
+
+    Parameters
+    ----------
+    hosts_ports : ty.Dict[str, _HostPortsMatched]
+    i_host : str
+        IP or lovalhost
+    i_track : rpr.Track
+    midi_ins : ty.List[_RTrackPort]
+        lost to insert the port
+
+    """
+    assigned = False
+    miss_in_ports_msg = "not enough in ports for host '%s'"
+    for idx, i_port in enumerate(hosts_ports[i_host][0]):
+        if i_port['dest_host'] == 'localhost':
+            midi_ins.append(
+                _RTrackPort(
+                    host=i_host,
+                    track=i_track,
+                    port=hosts_ports[i_host][0].pop(idx)['port']
+                )
+            )
+            assigned = True
+            break
+    if not assigned:
+        raise iface.ConnectionsError(miss_in_ports_msg % i_host)
+
+
+def _pop_out_port(
+    hosts_ports: ty.Dict[str, _HostPortsMatched], o_host: str, i_host: str,
+    o_track: _ROutTrack, midi_outs: ty.List[_RTrackPort]
+) -> None:
+    """Pop reaper midi port from host info and put into the midi_outs.
+
+    Parameters
+    ----------
+    hosts_ports : ty.Dict[str, _HostPortsMatched]
+    o_host : str
+        IP or localhost
+    i_host : str
+        IP or localhost
+    o_track : _ROutTrack
+        master track with slave info
+    midi_outs : ty.List[_RTrackPort]
+        list to insert the port
+
+    """
+    miss_out_ports_msg = "not enough out ports for host '%s'"
+    assigned = False
+    for idx, o_port in enumerate(hosts_ports[o_host][1]):
+        if o_port['dest_host'] == i_host:
+            r_o_port = _RTrackPort(
+                host=o_host,
+                track=o_track['track'],
+                port=hosts_ports[o_host][1].pop(idx)['port']
+            )
+            midi_outs.append(r_o_port)
+            assigned = True
+            break
+    if not assigned:
+        raise iface.ConnectionsError(miss_out_ports_msg % i_host)
+
+
+def _match_slave_track(
+    o_track: _ROutTrack, hosts_in_tracks: ty.Dict[str, ty.List[rpr.Track]]
+) -> ty.Tuple[str, rpr.Track]:
+    """Get slave track from the slave host info.
+
+    Warning
+    -------
+    slave track will be poped from list.
+
+    Parameters
+    ----------
+    o_track : _ROutTrack
+        master track with slave info
+    hosts_in_tracks : ty.Dict[str, ty.List[rpr.Track]]
+
+    """
+    s_track = o_track['slave']['track']
+    assigned = False
+    i_host = o_track['slave']['host']
+    i_tracks = hosts_in_tracks[i_host]
+    for idx, i_track in enumerate(i_tracks):
+        if s_track == i_track:
+            assigned = True
+            i_track = i_tracks.pop(idx)
+            break
+    if not assigned:
+        raise iface.ConnectionsError(
+            "can't find track {n} in project {p} at {s}".format(
+                n=s_track.name, p=s_track.project, s=i_host
+            )
+        )
+    #  pylint: disable=W0631
+    return i_host, i_track
+    #  pylint: enable=W0631
 
 
 def connect_by_task(
@@ -355,7 +514,7 @@ def connect_by_task(
 
     Parameters
     ----------
-    task: Tuple[out_tracks: List[_RTrackPort], in_tracks: List[_RTrackPort]]
+    task : ty.Tuple[ty.List[_RTrackPort], ty.List[_RTrackPort]]
         see 'get_connections_task(hosts)'
 
     """
@@ -381,11 +540,11 @@ def get_host_jack_ports(
 
     Parameters
     ----------
-    host : Optional[str], optional
+    host : ty.Optional[str], optional
         'localhost' or IPV4 address
 
-    Returns
-    -------
+    No Longer Returned
+    ------------------
     jack_in_ports: _JMidiPort
     jack_out_ports _JMidiPort
 
@@ -394,7 +553,7 @@ def get_host_jack_ports(
         host = None
     with rpr.connect(host):
         with rpr.inside_reaper():
-            a_id = RPR.NamedCommandLookup(
+            a_id: int = RPR.NamedCommandLookup(
                 '_RSc3a0868bee74abaf333ac661af9a4a27257c37c1'
             )
             rpr.perform_action(a_id)
@@ -410,11 +569,11 @@ def get_host_midi_ports(
 
     Parameters
     ----------
-    host : Optional[str], optional
+    host : ty.Optional[str], optional
         'localhost' or IPV4 address
 
-    Returns
-    -------
+    No Longer Returned
+    ------------------
     jack_in_ports: _JMidiPort
     jack_out_ports _JMidiPort
 
@@ -437,12 +596,12 @@ def update_host_info(hosts: ty.List[iface.HostInfo]) -> ty.List[_HostInfo]:
 
     Parameters
     ----------
-    hosts : List[interface.HostInfo]
+    hosts : ty.List[iface.HostInfo]
         ip and list of in and out tracks
 
     Returns
     -------
-    List[_HostInfo]
+    ty.List[_HostInfo]
         ip, list of tracks and list of midi ports
 
     """
@@ -474,6 +633,11 @@ class Connector(iface.Connector):
         """Call by the class user.
 
         Connect all given via HostInfo tracks to each other, using Jack backend
+
+        Raises
+        ------
+        sessioin_management.connections.interface.ConnectionsError
+
         """
         host_info = update_host_info(self.hosts)
         task = get_connection_task(host_info)
