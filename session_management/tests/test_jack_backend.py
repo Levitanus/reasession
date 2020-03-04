@@ -5,6 +5,7 @@ import reapy as rpr
 from reapy import reascript_api as RPR
 from IPy import IP
 from ..connections import jack_backend as bck
+from ..connections import interface as iface
 import mock
 from warnings import warn
 import jack
@@ -12,6 +13,7 @@ from random import randint
 
 
 class MonkeyTrack():
+
     def __init__(
         self,
         id: ty.Union[str, int] = None,
@@ -35,6 +37,7 @@ class MonkeyTrack():
 
 
 class MonkeyProject():
+
     def __init__(self, id: ty.Optional[str] = None, index: int = -1) -> None:
         self.id = id
         self.index = index
@@ -44,7 +47,9 @@ class MonkeyProject():
         return f'(ReaProject id={self.id}, index={self.index}'
 
     def make_current_project(self) -> ty.ContextManager:
+
         class CM:
+
             def __enter__(self) -> None:
                 return None
 
@@ -64,6 +69,7 @@ class MonkeyProject():
 
 
 class MonkeyJackPort:
+
     def __init__(self, name: str, uuid: str = 'basic_uuid') -> None:
         self.name = name
         self.uuid = uuid
@@ -223,10 +229,10 @@ def get_test_data(
         ],
         in_tracks=[
             rpr.Track(
-                id='slave_track_2', project=rpr.Project(id='slave_project_2')
+                id='slave_track_3', project=rpr.Project(id='slave_project_2')
             ),
             rpr.Track(
-                id='slave_track_3', project=rpr.Project(id='slave_project_2')
+                id='slave_track_2', project=rpr.Project(id='slave_project_2')
             ),
             rpr.Track(
                 id='slave_track_4', project=rpr.Project(id='slave_project_3')
@@ -326,6 +332,7 @@ def monkey_get_out_tracks(
 
 
 class MonkeyClient:
+
     def __init___(self, port, host='localhost'):
         self.port, self.host = port, host
 
@@ -334,7 +341,9 @@ class MonkeyClient:
 
 
 def test_parce_port_name(monkeypatch):
+
     class Port:
+
         def __init__(self, name: str) -> None:
             self.name = name
 
@@ -460,6 +469,15 @@ def test_get_connection_task(monkeypatch):
 
     assert t_midi_ins == r_midi_ins
     assert t_midi_outs == r_midi_outs
+    out = t_master['jack_out_ports'].pop()
+    # print(t_master['jack_out_ports'][5])
+    with pt.raises(iface.ConnectionsError):
+        bck.get_connection_task([t_master, t_slave])
+    t_master['jack_out_ports'].append(out)
+    t_slave['jack_in_ports'].pop(0)
+    t_slave['jack_in_ports'].pop(0)
+    with pt.raises(iface.ConnectionsError):
+        bck.get_connection_task([t_master, t_slave])
 
 
 # @pt.mark.skip

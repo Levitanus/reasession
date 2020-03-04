@@ -305,11 +305,14 @@ def get_connection_task(
     """
     midi_outs: ty.List[_RTrackPort] = []
     midi_ins: ty.List[_RTrackPort] = []
+    miss_in_ports_msg = "not enough in ports for host '%s'"
+    miss_out_ports_msg = "not enough out ports for host '%s'"
 
     for host in hosts:
         hostname = host['host']
         h_ports_in, h_ports_out = match_host_ports(host)
         for track in host['in_tracks']:
+            assigned = False
             for idx, port in enumerate(h_ports_in):
                 if port['dest_host'] == 'localhost':
                     midi_ins.append(
@@ -319,8 +322,13 @@ def get_connection_task(
                             'port': h_ports_in.pop(idx)['port']
                         }
                     )
+                    assigned = True
                     break
+
+            if not assigned:
+                raise iface.ConnectionsError(miss_in_ports_msg % host['host'])
         for o_track in host['out_tracks']:
+            assigned = False
             for idx, port in enumerate(h_ports_out):
                 if port['dest_host'] == o_track['slave']['host']:
                     midi_outs.append(
@@ -330,7 +338,12 @@ def get_connection_task(
                             'port': h_ports_out.pop(idx)['port']
                         }
                     )
+                    assigned = True
                     break
+            if not assigned:
+                raise iface.ConnectionsError(
+                    miss_out_ports_msg % o_track['slave']['host']
+                )
 
     return midi_outs, midi_ins
 
