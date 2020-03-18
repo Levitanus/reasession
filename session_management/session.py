@@ -9,15 +9,388 @@ from .connections import interface as conn
 
 MidiBus = ty.NewType('MidiBus', int)
 HostIP = ty.NewType('HostIP', str)
+T1 = ty.TypeVar('T1')
+
+Childs = ty.Dict['ChildAddress', 'Child']
 
 
-class MasterOutTrack:
+class SessionError(Exception):
+    pass
+
+
+class ChildAddress(ty.Tuple[int, int]):
+    """Represents MIDI (Bus, Channel) of child Track.
+
+    Can be compared to tuple. All (busses/channels) are equal to one.
+    """
+
+    def __new__(cls, bus: int, channel: int) -> 'ChildAddress':
+        return super().__new__(cls, (bus, channel))  # type:ignore
+
+    def __init__(self, bus: int, channel: int) -> None:
+        """make immutable address.
+
+        Parameters
+        ----------
+        bus : int
+        channel : int
+        """
+        super().__init__()
+
+    @property
+    def bus(self) -> int:
+        """MIDI Bus.
+
+        Returns
+        -------
+        int
+            0 if All buses
+            -1 if no midi routing
+        """
+        return self[0]
+
+    @property
+    def channel(self) -> int:
+        """Midi Channel.
+
+        Returns
+        -------
+        int
+            0 if All channels
+            -1 if no midi routing
+        """
+        return self[1]
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, ty.Sequence):
+            return False
+        if len(other) != 2:
+            return False
+        for item in other:
+            if not isinstance(item, int):
+                return False
+            if item > 16:
+                return False
+        if other[0] != self[0]:  # type:ignore
+            for item in (other[0], self[0]):
+                if item != 0:  # type:ignore
+                    return False
+                else:
+                    break
+        if other[1] != self[1]:  # type:ignore
+            for item in (other[1], self[1]):
+                if item != 0:  # type:ignore
+                    return False
+                else:
+                    break
+        return True
+
+    def __repr__(self) -> str:
+        return f'ChildAddress(bus={self.bus}, channel={self.channel})'
+
+    def __hash__(self) -> int:
+        return hash((self[0], self[1]))
+
+
+class Child:
+    """Represents tree branch of track recieves.
+
+    Attributes
+    ----------
+    track : Track
+        Will be modified in several cases (`target` attribute)
+    childs : Childs
+        the branch itself, if it's not a leaf.
+    """
+
+    track: 'Track'
+    childs: Childs
+
+    def __init__(
+        self, track: 'Track', childs: ty.Optional[Childs] = None
+    ) -> None:
+        self.track = track
+        if not childs:
+            childs = {}
+        self.childs = childs
+
+    def __repr__(self) -> str:
+        return f'Child(Track={self.track.name}, childs={self.childs})'
+
+    @classmethod
+    def match(
+        cls, childs_out: Childs, childs_in: Childs, last_target: Track
+    ) -> ty.Tuple[ty.Dict['Track.ID', 'Track'], ty.Dict['Track.ID', 'Track']]:
+        """Match two childs trees for making index of track targets.
+
+        Parameters
+        ----------
+        childs_out : Childs
+            Childs of master track connected to slave.
+        childs_in : Childs
+            Childs of slave track connected to master.
+        last_target : Track
+            In case of making from the master out track it has to be slave in.
+            Also invoked inside itself if childs have childs.
+
+        Returns
+        -------
+        Tuple[matched_primary: Dict['Track.ID', 'Track'],
+                matched_secondary: Dict['Track.ID', 'Track']]
+            matched_primary are tracks connected directly to targets
+            matched_secondary are tracks connected to the primary targets
+        """
+        matched_primary: ty.Dict[Track.ID, Track] = {}
+        matched_secondary: ty.Dict[Track.ID, Track] = {}
+        for key, child in childs_out.items():
+            track = child.track
+            c_p, c_s = cls._try_match_primary(key, childs_in, track, child)
+            matched_primary.update(c_p)
+            matched_secondary.update(c_s)
+            if not c_p:
+                track.target = last_target
+                matched_secondary[track.id_] = track
+                if child.childs:
+                    matched_secondary.update(
+                        cls._match_secondary(child.childs, last_target)
+                    )
+        return matched_primary, matched_secondary
+
+    @classmethod
+    def unpack(cls, childs: Childs) -> ty.Dict['Track.ID', 'Track']:
+        """Get index dict from the childs tree.
+
+        Parameters
+        ----------
+        childs : Childs
+
+        Note
+        ----
+        Tracks will not be matched to target.
+
+        Returns
+        -------
+        Dict['Track.ID', 'Track']
+        """
+        unpacked: ty.Dict[Track.ID, Track] = {}
+        for key, child in childs.items():
+            track = child.track
+            unpacked[track.id_] = track
+            if child.childs:
+                unpacked.update(child.unpack(child.childs))
+        return unpacked
+
+    @staticmethod
+    def _try_match_primary(
+        key: ChildAddress, childs_in: Childs, track: Track, child: Child
+    ) -> ty.Tuple[ty.Dict['Track.ID', 'Track'], ty.Dict['Track.ID', 'Track']]:
+        c_p: ty.Dict['Track.ID', 'Track'] = {}
+        c_s: ty.Dict['Track.ID', 'Track'] = {}
+        if key in childs_in:
+            temp_last_target = childs_in[key].track
+            track.target = temp_last_target
+            if child.childs:
+                c_p, c_s = Child.match(
+                    child.childs, childs_in[key].childs, temp_last_target
+                )
+            c_p.update({track.id_: track})
+        return c_p, c_s
+
+    @classmethod
+    def _match_secondary(cls, childs: Childs,
+                         last_target: Track) -> ty.Dict['Track.ID', 'Track']:
+        matched: ty.Dict[Track.ID, Track] = {}
+        for key, child in childs.items():
+            track = child.track
+            track.target = last_target
+            matched[track.id_] = track
+            if child.childs:
+                matched.update(cls._match_secondary(child.childs, last_target))
+        return matched
+
+
+class Track:
+    """Extended Track model, build on the top of reapy.Track.
+
+    Attributes
+    ----------
+    ID : str alias for the better type hints
+    id_ : Track.ID
+        usually, `(MediaTrack*)0xNNNNNNNNNNNNNNNN`
+    target : Optional[Track]
+        Track in the Slave project
+    track : reapy.Track
+    name : str
+    """
+
     ID = ty.NewType('ID', UUID)
-    _id: ID
-    track: rpr.Track
-    childs: ty.Dict[MasterMidiTrack.ID, MasterMidiTrack]
+    id_: ID
+    _BUS_FX_NAME: te.Literal[
+        '(Levitanus): pack MIDI BUSes to one channel or unpack them'
+    ] = '(Levitanus): pack MIDI BUSes to one channel or unpack them'
+    _BUS_PAR_IDX: te.Literal[0] = 0
+    target: ty.Optional[Track]
+    name: str
+    _track: rpr.Track
+    _childs: ty.Dict[Track.ID, Track]
+    _childs_matched: ty.Dict[Track.ID, Track]
+
+    def __init__(
+        self, track: rpr.Track, childs_are_receives: bool = True
+    ) -> None:
+        """Extended Track model, build on the top of reapy.Track.
+
+        Parameters
+        ----------
+        track : rpr.Track
+        """
+        self._track = track
+        self.name = track.name
+        self.id_ = ty.cast(Track.ID, track.id)
+        self.target = None
+        self._childs_are_receives = childs_are_receives
+        self._childs = {}
+        self._childs_matched = {}
+
+    def __repr__(self) -> str:
+        return f'{self.__module__}.Track(name={self.name})'
+
+    @property
+    def make_current_project(self) -> ty.Callable[[], ty.ContextManager[None]]:
+        return self._track.project.make_current_project
+
+    @property
+    def track(self) -> rpr.Track:
+        return self._track
+
+    @property
+    def buses_packed(self) -> bool:
+        """Whether MIDI BUSes are packed to one channel or not.
+
+        Note
+        ----
+        currently it's made by the custom JSFX
+
+        Returns
+        -------
+        bool
+        """
+        with rpr.inside_reaper():
+            fxlist = self.track.fxs
+            try:
+                fx = fxlist[self._BUS_FX_NAME]
+                par = fx.params[self._BUS_PAR_IDX]
+            except KeyError:
+                return False
+            return par.normalized == 0
+        return False
+
+    @property
+    def buses_unpacked(self) -> bool:
+        """Whether MIDI BUSes are unpacked from one channel or not.
+
+        Note
+        ----
+        currently it's made by the custom JSFX
+
+        Returns
+        -------
+        bool
+        """
+        with rpr.inside_reaper():
+            fxlist = self.track.fxs
+            try:
+                fx = fxlist[self._BUS_FX_NAME]
+                par = fx.params[self._BUS_PAR_IDX]
+            except KeyError:
+                return False
+            return par.normalized == 1
+        return False
+
+    def get_childs_tree(self) -> Childs:
+        """Get tree-like collection of tracks, connected by receives.
+
+        Returns
+        -------
+        Childs
+        """
+        out: Childs = {}
+        if self._childs_are_receives:
+            ch_t = self.track.receives
+        else:
+            ch_t = self.track.sends
+        for rcv in ch_t:
+            if self._childs_are_receives:
+                source = rcv.source_track
+                midi_d = rcv.midi_dest
+            else:
+                source = rcv.dest_track
+                midi_d = rcv.midi_source
+            if midi_d == (-1, -1):
+                continue
+            addr = ChildAddress(*midi_d)
+            ch_tr = Track(source, self._childs_are_receives)
+            childs = ch_tr.get_childs_tree()
+            out[addr] = Child(ch_tr, childs)
+        return out
+
+    @property
+    def childs(self) -> ty.Dict[Track.ID, Track]:
+        """Flat dict of all childs.
+
+        Returns
+        -------
+        ty.Dict[Track.ID, Track]
+        """
+        ch_d = self._childs
+        if ch_d:
+            return ch_d
+        with self.make_current_project():
+            ch_tree = self.get_childs_tree()
+        return Child.unpack(ch_tree)
+
+    def match_childs(self) -> ty.Dict[Track.ID, Track]:
+        """Flat collection of childs, matched to the slave tracks.
+
+        Returns
+        -------
+        ty.Dict[Track.ID, Track]
+
+        Raises
+        ------
+        SessionError
+            If no target set for the Track.
+        """
+        self._childs_matched
+        if self._childs_matched:
+            return self._childs_matched
+        if not self.target:
+            raise SessionError(f'track {self} has no target')
+        s_ch_tree = self.get_childs_tree()
+        with self.target.make_current_project():
+            t_ch_tree = self.target.get_childs_tree()
+        p_c, s_c = Child.match(s_ch_tree, t_ch_tree, self.target)
+        self._childs_matched = {**p_c, **s_c}
+        return self._childs_matched
+
+
+class MasterOutTrack(Track):
     slave: SlaveProject
     target: SlaveInTrack
+
+    def __init__(
+        self, track: rpr.Track, slave: SlaveProject, target: SlaveInTrack
+    ) -> None:
+        super().__init__(track=track)
+        self.slave = slave
+        self.target = target
+
+
+class SlaveInTrack(Track):
+    project: SlaveProject
+
+    def __init__(self, track: rpr.Track, childs_are_receives: bool = False):
+        super().__init__(track, childs_are_receives)
 
 
 class _MasterMidiTrackTarget(te.TypedDict):
@@ -27,14 +400,15 @@ class _MasterMidiTrackTarget(te.TypedDict):
     rpr_track: rpr.Track
 
 
-class MasterMidiTrack:
-    ID = ty.NewType('ID', UUID)
-    _id: ID
+class MasterMidiTrack(Track):
     track: rpr.Track
     out_track: MasterOutTrack
     out_bus: MidiBus
-    selected: bool
+    armed: bool
     dirty: bool
+
+    # def __init__(self, track: rpr.Track) -> None:
+    #     self.id_ = ty.cast(MasterMidiTrack.ID, track.id)
 
     @property
     def target(self) -> _MasterMidiTrackTarget:
@@ -56,6 +430,23 @@ class SlaveSubProject:
     temp_file: Path
 
 
+class Project:
+    # project: rpr.Project
+
+    def __init__(self, project: rpr.Project) -> None:
+        self._project = project
+
+    @property
+    def project(self) -> rpr.Project:
+        return self._project
+
+    def get_share_data(self) -> ShareProjectData:
+        raise NotImplementedError
+
+    def set_share_data(self, data: ShareProjectData) -> None:
+        raise NotImplementedError
+
+
 class SlaveProject:
     ID = ty.NewType('ID', UUID)
     _id: ID
@@ -72,17 +463,9 @@ class SlaveProject:
     unloaded: bool
 
 
-class SlaveInTrack:
-    ID = ty.NewType('ID', UUID)
-    _id: ID
-    track: rpr.Track
-    childs: ty.Dict[MidiBus, SlaveInstTrack]
-    project: SlaveProject
-
-
 class SlaveInstTrack:
     ID = ty.NewType('ID', UUID)
-    _id: ID
+    id_: ID
     track: rpr.Track
     in_track: SlaveInTrack
     in_bus: MidiBus
@@ -94,16 +477,6 @@ class SlaveInstTrack:
 
 class ShareProjectData:
     tempo_track: object
-
-
-class Project:
-    project: rpr.Project
-
-    def get_share_data(self) -> ShareProjectData:
-        raise NotImplementedError
-
-    def set_share_data(self, data: ShareProjectData) -> None:
-        raise NotImplementedError
 
 
 class SlaveTemplate:

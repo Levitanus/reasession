@@ -21,43 +21,42 @@ class MyClass:
         return False
 
 
-class MockExtState:
+# class MockExtState:
 
-    def __init__(self) -> None:
-        self.sections: ty.Dict[str, ty.Dict[str, str]] = {}
+#     def __init__(self) -> None:
+#         self.sections: ty.Dict[str, ty.Dict[str, str]] = {}
 
-    def set(self, section: str, key: str, data: str) -> None:
-        if not hasattr(self.sections, section):
-            self.sections[section] = {}
-        self.sections[section][key] = data
+#     def set(self, section: str, key: str, data: str) -> None:
+#         if not hasattr(self.sections, section):
+#             self.sections[section] = {}
+#         self.sections[section][key] = data
 
-    def get(self, section: str, key: str) -> str:
-        if not hasattr(self.sections, section):
-            return ''
-        if not hasattr(self.sections[section], key):
-            return ''
-        return self.sections[section][key]
+#     def get(self, section: str, key: str) -> str:
+#         if not hasattr(self.sections, section):
+#             return ''
+#         if not hasattr(self.sections[section], key):
+#             return ''
+#         return self.sections[section][key]
 
+# class MockProjExtState:
 
-class MockProjExtState:
+#     def __init__(self) -> None:
+#         self.sections: ty.Dict[str, ty.Dict[str, str]] = {}
 
-    def __init__(self) -> None:
-        self.sections: ty.Dict[str, ty.Dict[str, str]] = {}
+#     def set(self, section: str, key: str, data: str) -> None:
+#         if not hasattr(self.sections, section):
+#             self.sections[section] = {}
+#         self.sections[section][key] = data
 
-    def set(self, section: str, key: str, data: str) -> None:
-        if not hasattr(self.sections, section):
-            self.sections[section] = {}
-        self.sections[section][key] = data
-
-    def get(
-        self, proj: rpr.Project, section: str, key: str, valOutNeedBig: str,
-        valOutNeedBig_sz: int
-    ) -> ty.Tuple[int, rpr.Project, str, str, int]:
-        if not hasattr(self.sections, section):
-            return ''
-        if not hasattr(self.sections[section], key):
-            return ''
-        return self.sections[section][key]
+#     def get(
+#         self, proj: rpr.Project, section: str, key: str, valOutNeedBig: str,
+#         valOutNeedBig_sz: int
+#     ) -> ty.Tuple[int, rpr.Project, str, str, int]:
+#         if not hasattr(self.sections, section):
+#             return ''
+#         if not hasattr(self.sections[section], key):
+#             return ''
+#         return self.sections[section][key]
 
 
 def get_test_data():
@@ -71,10 +70,11 @@ def get_test_data():
     }, "just_string"
 
 
+@pt.mark.skipif(not rpr.is_connected(), reason='not connected to reaper')
 def test_dumps():
-    ext_state = MockExtState()
-    mock.patch('rpr.set_ext_state', ext_state.set)
-    mock.patch('rpr.get_ext_state', ext_state.get)
+    # ext_state = MockExtState()
+    # mock.patch('rpr.set_ext_state', ext_state.set)
+    # mock.patch('rpr.get_ext_state', ext_state.get)
     data, string = get_test_data()
 
     prs.dumps('some_key', data)
@@ -86,10 +86,11 @@ def test_dumps():
     prs.dumps('key', '')
 
 
+@pt.mark.skipif(not rpr.is_connected(), reason='not connected to reaper')
 def test_porj_dumps():
-    mock.patch('RPR.GetProjExtState')
-    mock.patch('RPR.SetProjExtState')
-    mock.patch('rpr.Project')
+    # mock.patch('RPR.GetProjExtState')
+    # mock.patch('RPR.SetProjExtState')
+    # mock.patch('rpr.Project')
     data, string = get_test_data()
     project = rpr.Project()
 

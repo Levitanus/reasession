@@ -4,5 +4,5 @@ setup(
     version="0.1",
     packages=find_packages(),
     package_data={'': ['*.kv']},
-    install_requires=['kivy', 'typing_extensions', 'python-reapy'],
+    install_requires=['typing_extensions', 'python-reapy'],
 )

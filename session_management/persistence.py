@@ -25,18 +25,18 @@ def proj_dumps(project: rpr.Project, key: str, data: object) -> int:
     state = codecs.encode(dump, 'base64').decode()
     size: int = len(state)
     RPR.SetProjExtState(  # type:ignore
-            project.id,  # noob formatting comment
-            SECTION,
-            key,
-            state
-        )
+        project.id,  # noob formatting comment
+        SECTION,
+        key,
+        state
+    )
     size_str: str = str(str(size).encode().zfill(1000), 'utf-8')
     RPR.SetProjExtState(  # type:ignore
-            project.id,  # noob formatting comment
-            SECTION,
-            key+'_size',
-            size_str
-        )
+        project.id,  # noob formatting comment
+        SECTION,
+        key+'_size',
+        size_str
+    )
     return size
 
 
