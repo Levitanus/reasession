@@ -10,22 +10,25 @@ from . import MASTER_PROJ_NAME, SLAVE_PROJECT_NAME
 
 
 # @pt.mark.skip
-@pt.mark.skipif(not rpr.is_connected(), reason='not connected to reaper')
+@pt.mark.skipif(
+    not rpr.dist_api_is_enabled(), reason='not connected to reaper'
+)
 @rpr.inside_reaper()
 def test_master_out_track():
-    m_pr = rpr.Project(MASTER_PROJ_NAME)
-    s_pr = rpr.Project(SLAVE_PROJECT_NAME)
+    m_pr = ss.Project(MASTER_PROJ_NAME)
+    s_pr = ss.SlaveProject(SLAVE_PROJECT_NAME, 'localhost')
     m_pr.make_current_project()
     m_tr = rpr.Track(id='out', project=m_pr)
+    # print(s_pr.__module__, s_pr.__qualname__)
     with s_pr.make_current_project():
         s_tr = rpr.Track(id='in', project=s_pr)
     o_track = ss.MasterOutTrack(
-        track=m_tr, slave=ss.SlaveProject(), target=ss.SlaveInTrack(s_tr)
+        track=m_tr, slave=s_pr, target=ss.SlaveInTrack(s_tr)
     )
 
     o_childs = o_track.childs
     assert rpr.Track(
-        id='no_midi_send', project=rpr.Project(MASTER_PROJ_NAME)
+        id='no_midi_send', project=ss.Project(MASTER_PROJ_NAME)
     ).id not in o_childs
     assert len(o_childs) == 18
 
@@ -51,6 +54,22 @@ def test_master_out_track():
         assert matched[m_id].target.track == rpr.Track(
             id='B2Ch1B1', project=s_pr
         )
+
+
+@pt.mark.skipif(
+    not rpr.dist_api_is_enabled(), reason='not connected to reaper'
+)
+@mock.patch.object(rpr, 'connect')
+def test_slave_track(mConnect):
+    host = '192.168.2.1'
+    pr = ss.SlaveProject(id=SLAVE_PROJECT_NAME, host=host)
+    with pr.make_current_project():
+        tr = ss.SlaveInTrack(rpr.Track('in', project=pr))
+    rpr.Project(MASTER_PROJ_NAME).make_current_project()
+    with tr.connect():
+        mConnect.assert_called_with(host)
+        assert tr.track.name == 'in'
+    assert tr.track.name == ''
 
 
 class MonkeySessTrack:
@@ -93,7 +112,8 @@ def test_child_address():
     assert ad1 == (0, 2)
     assert ad1 != (0, 1)
     assert ad1 != (2, 2)
-    assert ad1 != (2, 2, 3)
+    assert ad1 != (1, 2, 3)
+    # test for `exists`
     assert ad1 in ((0, 1), (3, 4), (1, 2))
 
 
@@ -213,7 +233,9 @@ def test_childs_tree():
 
 
 # @pt.mark.skip
-@pt.mark.skipif(not rpr.is_connected(), reason='not connected to reaper')
+@pt.mark.skipif(
+    not rpr.dist_api_is_enabled(), reason='not connected to reaper'
+)
 def test_get_childs_tree():
     # test straight
     track = ss.Track(
@@ -229,7 +251,9 @@ def test_get_childs_tree():
     assert tree[(0, 1)].childs[(1, 0)].track.name == 'B4Ch1B1'
 
 
-@pt.mark.skipif(not rpr.is_connected(), reason='not connected to reaper')
+@pt.mark.skipif(
+    not rpr.dist_api_is_enabled(), reason='not connected to reaper'
+)
 def test_bus_packed():
 
     def track(id: str) -> ss.Track:

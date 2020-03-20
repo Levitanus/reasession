@@ -70,7 +70,7 @@ def get_test_data():
     }, "just_string"
 
 
-@pt.mark.skipif(not rpr.is_connected(), reason='not connected to reaper')
+@pt.mark.skipif(not rpr.dist_api_is_enabled(), reason='not connected to reaper')
 def test_dumps():
     # ext_state = MockExtState()
     # mock.patch('rpr.set_ext_state', ext_state.set)
@@ -86,7 +86,7 @@ def test_dumps():
     prs.dumps('key', '')
 
 
-@pt.mark.skipif(not rpr.is_connected(), reason='not connected to reaper')
+@pt.mark.skipif(not rpr.dist_api_is_enabled(), reason='not connected to reaper')
 def test_porj_dumps():
     # mock.patch('RPR.GetProjExtState')
     # mock.patch('RPR.SetProjExtState')
