@@ -1,42 +1,25 @@
+"""Extended Track classes for dealing with several projects.
+
+Attributes
+----------
+Childs : Dict[ChildAddress, Child]
+    The basic index for quick iteration or retrieving tracks, that are tracked.
+
+"""
 from __future__ import annotations
 import typing as ty
-import typing_extensions as te
-import reapy as rpr
-from reapy import reascript_api as RPR
-from pathlib import Path
-from uuid import uuid4, UUID
-from .connections import interface as conn
 from enum import IntEnum
-from contextlib import contextmanager
 from builtins import BaseException
 from types import TracebackType
+import typing_extensions as te
+import reapy as rpr
 
-MidiBus = ty.NewType('MidiBus', int)
-HostIP = ty.NewType('HostIP', str)
+from . import SessionError, HostIP
+from .projects import Project, SlaveProject
+
 T1 = ty.TypeVar('T1')
 
 Childs = ty.Dict['ChildAddress', 'Child']
-
-
-class SessionError(Exception):
-    pass
-
-
-class FreezeState(IntEnum):
-    """Represents Project or Track Instruments state.
-
-    Attributes
-    ----------
-    disabled : int
-    freezed : int
-    offline : int
-    online : int
-    """
-
-    online = 0
-    offline = 1
-    disabled = 2
-    freezed = 3
 
 
 class ChildAddress(ty.Tuple[int, int]):
@@ -49,7 +32,7 @@ class ChildAddress(ty.Tuple[int, int]):
         return super().__new__(cls, (bus, channel))  # type:ignore
 
     def __init__(self, bus: int, channel: int) -> None:
-        """make immutable address.
+        """Make immutable address.
 
         Parameters
         ----------
@@ -92,15 +75,16 @@ class ChildAddress(ty.Tuple[int, int]):
                 return False
             if item > 16:
                 return False
-        if other[0] != self[0]:  # type:ignore
+        other = ty.cast(ty.Tuple[int, int], other)
+        if other[0] != self[0]:
             for item in (other[0], self[0]):
-                if item != 0:  # type:ignore
+                if item != 0:
                     return False
                 else:
                     break
-        if other[1] != self[1]:  # type:ignore
+        if other[1] != self[1]:
             for item in (other[1], self[1]):
-                if item != 0:  # type:ignore
+                if item != 0:
                     return False
                 else:
                     break
@@ -130,6 +114,13 @@ class Child:
     def __init__(
         self, track: 'Track', childs: ty.Optional[Childs] = None
     ) -> None:
+        """Make child tree leaf or branch.
+
+        Parameters
+        ----------
+        track : Track
+        childs : ty.Optional[Childs], optional
+        """
         self.track = track
         if not childs:
             childs = {}
@@ -194,7 +185,7 @@ class Child:
         Dict['Track.ID', 'Track']
         """
         unpacked: ty.Dict[Track.ID, Track] = {}
-        for key, child in childs.items():
+        for child in childs.values():
             track = child.track
             unpacked[track.id] = track
             if child.childs:
@@ -221,7 +212,7 @@ class Child:
     def _match_secondary(cls, childs: Childs,
                          last_target: Track) -> ty.Dict['Track.ID', 'Track']:
         matched: ty.Dict[Track.ID, Track] = {}
-        for key, child in childs.items():
+        for child in childs.values():
             track = child.track
             track.target = last_target
             matched[track.id] = track
@@ -231,6 +222,16 @@ class Child:
 
 
 class TrackChildsSet(IntEnum):
+    """Enum for Track.match_childs method.
+
+    Attributes
+    ----------
+    both : int
+        return Tuple[primary, secondary]
+    primary : int
+    secondary : int
+    """
+
     both = 0
     primary = 1
     secondary = 2
@@ -242,12 +243,10 @@ class Track(rpr.Track):
     Attributes
     ----------
     ID : str alias for the better type hints
-    id_ : Track.ID
+    id : Track.ID
         usually, `(MediaTrack*)0xNNNNNNNNNNNNNNNN`
     target : Optional[Track]
         Track in the Slave project
-    track : reapy.Track
-    name : str
     """
 
     ID = ty.NewType('ID', str)
@@ -266,11 +265,16 @@ class Track(rpr.Track):
     def __init__(
         self, id: str, project: Project, childs_are_receives: bool = True
     ) -> None:
-        """Extended Track model, build on the top of reapy.Track.
+        """Extend Track model based on reapy.Track.
 
         Parameters
         ----------
-        track : rpr.Track
+        id : str
+            name or id of Reaper track
+        project : Project
+            host must be specified
+        childs_are_receives : bool, optional, default=True
+            if False, childs will be get from sends.
         """
         super().__init__(id=id, project=project)
         self._sess_project = project
@@ -280,15 +284,24 @@ class Track(rpr.Track):
         self._childs_matched_primary = {}
         self._childs_matched_secondary = {}
 
-    # def __repr__(self) -> str:
-    #     return f'{self.__module__}.Track(name={self.name})'
-
     @property
     def s_project(self) -> Project:
+        """Stable property of Track's project, keepeng project attributes.
+
+        Returns
+        -------
+        Project
+        """
         return self._sess_project
 
     @property
     def make_current_project(self) -> ty.Callable[[], ty.ContextManager[None]]:
+        """Context manager for making cjanges under the project.
+
+        Returns
+        -------
+        ty.Callable[[], ty.ContextManager[None]]
+        """
         return self.project.make_current_project
 
     @property
@@ -310,7 +323,7 @@ class Track(rpr.Track):
                 par = fx.params[self._BUS_PAR_IDX]
             except KeyError:
                 return False
-            return par.normalized == 0
+            return par == 0
         return False
 
     @property
@@ -332,7 +345,7 @@ class Track(rpr.Track):
                 par = fx.params[self._BUS_PAR_IDX]
             except KeyError:
                 return False
-            return par.normalized == 1
+            return par == 1
         return False
 
     def get_childs_tree(self) -> Childs:
@@ -360,10 +373,10 @@ class Track(rpr.Track):
             ch_tr = Track(
                 id=source.id,
                 project=Project(source.project.id, self.s_project.last_ip),
-                childs_are_receives=self._childs_are_receives  # type:ignore
+                childs_are_receives=self._childs_are_receives
             )
-            childs = ch_tr.get_childs_tree()  # type:ignore
-            out[addr] = Child(ch_tr, childs)  # type:ignore
+            childs = ch_tr.get_childs_tree()
+            out[addr] = Child(ch_tr, childs)
         return out
 
     @property
@@ -394,7 +407,6 @@ class Track(rpr.Track):
         SessionError
             If no target set for the Track.
         """
-        # self._childs_matched
         if self._childs_matched_primary:
             return self._return_matched_childs(childs_set)
         if not self.target:
@@ -422,7 +434,7 @@ class Track(rpr.Track):
             return self._childs_matched_secondary
         raise SessionError(f"can't recognize argument: {childs_set}")
 
-    def connect(self) -> ty.ContextManager[Track]:
+    def connect(self) -> TrackConnect:
         """Context manager as syntax sugar.
 
         Note
@@ -431,12 +443,22 @@ class Track(rpr.Track):
 
         Returns
         -------
-        SlaveInTrack
+        ContextManager[Track]
         """
         return TrackConnect(self)
 
 
 class TrackConnect(ty.ContextManager[Track]):
+    """Context manager as syntax sugar for several reapy's.
+
+    Attributes
+    ----------
+    connect : reapy.connect
+    curr_proj : reapy.Project.make_current_project()
+    ir : reapy.inside_reaper
+    track : Track
+    """
+
     track: Track
     connect: rpr.connect
     curr_proj: ty.ContextManager[None]
@@ -446,23 +468,23 @@ class TrackConnect(ty.ContextManager[Track]):
         self.track = track
 
     def __enter__(self) -> Track:
-        pr = self.track.project
+        pr = self.track.s_project
         self.connect = rpr.connect(pr.last_ip)
-        self.connect.__enter__()  # type:ignore
-        self.ir = rpr.inside_reaper()  # type:ignore
-        self.ir.__enter__()  # type:ignore
-        self.curr_proj = pr.make_current_project()  # type:ignore
-        self.curr_proj.__enter__()  # type:ignore
-        return self.track  # type:ignore
+        self.connect.__enter__()
+        self.ir = rpr.inside_reaper()
+        self.ir.__enter__()
+        self.curr_proj = pr.make_current_project()
+        self.curr_proj.__enter__()
+        return self.track
 
     def __exit__(
-        self, type: ty.Optional[ty.Type[BaseException]],
+        self, exc_type: ty.Optional[ty.Type[BaseException]],
         value: ty.Optional[BaseException],
         traceback: ty.Optional[TracebackType]
     ) -> None:
-        self.curr_proj.__exit__(type, value, traceback)
-        self.ir.__exit__(type, value, traceback)
-        self.connect.__exit__(type, value, traceback)
+        self.curr_proj.__exit__(exc_type, value, traceback)
+        self.ir.__exit__(exc_type, value, traceback)
+        self.connect.__exit__(exc_type, value, traceback)
 
 
 class MasterOutTrack(Track):
@@ -482,7 +504,7 @@ class MasterOutTrack(Track):
     def __init__(
         self, id: str, project: Project, target: SlaveInTrack
     ) -> None:
-        """Controls output data frol and slave connection.
+        """Control output data frow and slave connection.
 
         Parameters
         ----------
@@ -497,9 +519,56 @@ class MasterOutTrack(Track):
         self.slave = target.project
         self.target = target
 
+    def sync_recarm(self) -> None:
+        """Synchronize recarm state of all childs with target childs.
+
+        Raises
+        ------
+        SessionError
+            If no childs matched to slave.
+        """
+        if self.target is None:
+            raise SessionError(f'no target for track {self.name} ({self})')
+        if not self._childs_matched_primary:
+            raise SessionError(f'no matched childs for {self.name} ({self})')
+        childs = self._return_matched_childs(TrackChildsSet.both)
+        t_host = self.s_project.last_ip
+        Targets = te.TypedDict('Targets', {'target': Track, 'recarm': bool})
+
+        with rpr.inside_reaper():
+            targets: ty.Dict[Track.ID, Targets] = {}
+            for child in childs.values():
+                recarm = child.recarm
+                assert child.target, f'no target for child: {child}'
+                target = child.target
+                if target.id not in targets:
+                    targets[target.id] = {'target': target, 'recarm': recarm}
+                elif recarm is True:
+                    targets[target.id]['recarm'] = True
+        with rpr.connect(t_host):
+            with rpr.inside_reaper():
+                with self.target.make_current_project():
+                    for t_dict in targets.values():
+                        target = t_dict['target']
+                        recarm = t_dict['recarm']
+                        target.recarm = recarm
+
+    def update(self) -> None:
+        """Update state of the Track.
+
+        Note
+        ----
+        May take a long
+        """
+        self._childs = {}
+        self._childs_matched_primary = {}
+        self.match_childs()
+        self.sync_recarm()
+
 
 class SlaveInTrack(Track):
     """Controls input stream of slave project."""
+
     project: SlaveProject
 
     def __init__(
@@ -508,7 +577,7 @@ class SlaveInTrack(Track):
         project: SlaveProject,
         childs_are_receives: bool = False
     ) -> None:
-        """Controls input stream of slave project.
+        """Control input stream of slave project.
 
         Parameters
         ----------
@@ -519,16 +588,6 @@ class SlaveInTrack(Track):
         assert isinstance(project, SlaveProject)
         super().__init__(id, project, childs_are_receives)
 
-    # @property
-    # def project(self) -> SlaveProject:
-    #     Slave project, keeps the Track.
-
-    #     Returns
-    #     -------
-    #     SlaveProject
-
-    #     return self._project
-
     @property
     def host(self) -> HostIP:
         """Slave host IP address (last seen).
@@ -537,50 +596,4 @@ class SlaveInTrack(Track):
         -------
         HostIP
         """
-        return self.project.last_ip
-
-
-class Project(rpr.Project):
-    _host_ip: HostIP
-
-    def __init__(
-        self, id: ty.Union[str, int], ip: HostIP = HostIP('localhost')
-    ) -> None:
-        self._host_ip = ip
-        super().__init__(id)
-
-    # @property
-    # def _args(self) -> ty.Tuple[str, HostIP]:  # type:ignore
-    #     original = super()._args
-    #     return (*original, self.last_ip)  # type:ignore
-
-    @property
-    def last_ip(self) -> HostIP:
-        return self._host_ip
-
-    @last_ip.setter
-    def last_ip(self, ip: HostIP) -> None:
-        self._host_ip = ip
-
-
-class SlaveProject(Project):
-    dirty: bool
-    # master_track: rpr.Track
-    # subproject: SlaveSubProject
-    # acessible: bool
-    # last_ip: HostIP
-
-    # master_out_tracks: ty.Dict[MasterOutTrack.ID, MasterOutTrack]
-    # slave_in_tracks: ty.Dict[SlaveInTrack.ID, SlaveInTrack]
-    # freezed: bool
-    # disabled: bool
-    # unloaded: bool
-
-    # def __init__(self, id: ty.Union[int, str], host: HostIP) -> None:
-    #     super().__init__(id)
-    #     self.last_ip = host
-
-    # @property
-    # def _args(self) -> ty.Tuple[str, HostIP]:  # type:ignore
-    #     original = super()._args
-    #     return (*original, self.last_ip)
+        return self.s_project.last_ip

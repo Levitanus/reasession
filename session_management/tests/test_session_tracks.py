@@ -6,8 +6,6 @@ from reapy import reascript_api as RPR
 from .. import session as ss
 from . import MASTER_PROJ_NAME, SLAVE_PROJECT_NAME
 
-# from time import sleep
-
 
 @pt.mark.skipif(
     not rpr.dist_api_is_enabled(), reason='not connected to reaper'
@@ -23,7 +21,7 @@ def test_project():
 )
 @rpr.inside_reaper()
 def test_master_out_track():
-    m_pr = ss.Project(MASTER_PROJ_NAME)
+    m_pr = ss.Project(MASTER_PROJ_NAME, 'localhost')
     s_pr = ss.SlaveProject(SLAVE_PROJECT_NAME, 'localhost')
     m_pr.make_current_project()
     # m_tr = rpr.Track(id='out', project=m_pr)
@@ -31,7 +29,7 @@ def test_master_out_track():
     with s_pr.make_current_project():
         s_tr = ss.SlaveInTrack(id='in', project=s_pr)
     o_track = ss.MasterOutTrack(id='out', project=m_pr, target=s_tr)
-    # print(type(o_track.project))
+    assert s_tr.project.last_ip == 'localhost'
 
     o_childs = o_track.childs
     assert rpr.Track(
@@ -41,6 +39,7 @@ def test_master_out_track():
 
     matched = o_track.match_childs()
     m_id = rpr.Track(id='B4', project=m_pr).id
+    assert matched[m_id].target.s_project.last_ip == 'localhost'
     with s_pr.make_current_project():
         assert matched[m_id].target == rpr.Track(id='B4', project=s_pr)
 
@@ -55,6 +54,32 @@ def test_master_out_track():
     m_id = rpr.Track(id='B2Ch1B1', project=m_pr).id
     with s_pr.make_current_project():
         assert matched[m_id].target == rpr.Track(id='B2Ch1B1', project=s_pr)
+
+    # recarm
+    master_names = ('B1', 'B3Ch4', 'B4Ch1B1')
+    slave_names = ('B1', 'B3Ch4', 'B4Ch1')
+    with m_pr.make_current_project():
+        for name in master_names:
+            tr = rpr.Track(id=name, project=m_pr)
+            tr.recarm = True
+    o_track.sync_recarm()
+    with s_pr.make_current_project():
+        tr = rpr.Track(id='B4', project=s_pr)
+        assert tr.recarm == False
+        for name in slave_names:
+            tr = rpr.Track(id=name, project=s_pr)
+            assert tr.recarm == True
+    with m_pr.make_current_project():
+        for name in master_names:
+            tr = rpr.Track(id=name, project=m_pr)
+            tr.recarm = False
+    o_track.sync_recarm()
+    with s_pr.make_current_project():
+        tr = rpr.Track(id='B4', project=s_pr)
+        assert tr.recarm == False
+        for name in slave_names:
+            tr = rpr.Track(id=name, project=s_pr)
+            assert tr.recarm == False
 
 
 @pt.mark.skipif(
@@ -72,24 +97,6 @@ def test_slave_track(mConnect):
         mConnect.assert_called_with(host)
         assert tr.name == 'in'
     assert tr.name == ''
-
-
-# @pt.mark.skipif(
-#     not rpr.dist_api_is_enabled(), reason='not connected to reaper'
-# )
-# @rpr.inside_reaper()
-# def test_recarm():
-#     host = 'localhost'
-#     s_pr = ss.SlaveProject(id=SLAVE_PROJECT_NAME, host=host)
-#     with s_pr.make_current_project():
-#         s_tracks = {}
-#         for name in ['B1', 'B1Ch1', 'B4']:
-#             s_tracks[name] = ss.Track(rpr.Track(id=name, project=s_pr))
-#     m_pr = rpr.Project(id=MASTER_PROJ_NAME)
-#     m_pr.make_current_project()
-#     o_tracks = {}
-#     for name in ['B1', 'B1Ch1', 'B4Ch']
-#     # o_tr = ss.MasterOutTrack(rpr.Track(''), slave=s_pr, target: SlaveInTrack)
 
 
 class MonkeySessTrack:
@@ -277,7 +284,7 @@ def test_get_childs_tree():
 def test_bus_packed():
 
     def track(id: str) -> ss.Track:
-        return ss.Track(id=id, project=rpr.Project(MASTER_PROJ_NAME))
+        return ss.Track(id=id, project=ss.Project(MASTER_PROJ_NAME))
         # return ss.Track(r_tr)
 
     tr = track('B2Ch1')
