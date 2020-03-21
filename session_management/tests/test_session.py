@@ -59,10 +59,11 @@ def test_master_out_track():
 @pt.mark.skipif(
     not rpr.dist_api_is_enabled(), reason='not connected to reaper'
 )
+@rpr.inside_reaper()
 @mock.patch.object(rpr, 'connect')
 def test_slave_track(mConnect):
     host = '192.168.2.1'
-    pr = ss.SlaveProject(id=SLAVE_PROJECT_NAME, host=host)
+    pr = ss.SlaveProject(id=SLAVE_PROJECT_NAME, ip=host)
     with pr.make_current_project():
         tr = ss.SlaveInTrack(rpr.Track('in', project=pr))
     rpr.Project(MASTER_PROJ_NAME).make_current_project()
@@ -70,6 +71,24 @@ def test_slave_track(mConnect):
         mConnect.assert_called_with(host)
         assert tr.track.name == 'in'
     assert tr.track.name == ''
+
+
+# @pt.mark.skipif(
+#     not rpr.dist_api_is_enabled(), reason='not connected to reaper'
+# )
+# @rpr.inside_reaper()
+# def test_recarm():
+#     host = 'localhost'
+#     s_pr = ss.SlaveProject(id=SLAVE_PROJECT_NAME, host=host)
+#     with s_pr.make_current_project():
+#         s_tracks = {}
+#         for name in ['B1', 'B1Ch1', 'B4']:
+#             s_tracks[name] = ss.Track(rpr.Track(id=name, project=s_pr))
+#     m_pr = rpr.Project(id=MASTER_PROJ_NAME)
+#     m_pr.make_current_project()
+#     o_tracks = {}
+#     for name in ['B1', 'B1Ch1', 'B4Ch']
+#     # o_tr = ss.MasterOutTrack(rpr.Track(''), slave=s_pr, target: SlaveInTrack)
 
 
 class MonkeySessTrack:
