@@ -4,6 +4,38 @@
 		"selected_items":
 		[
 			[
+				"_chi",
+				"_childs_are_receives\tstatement"
+			],
+			[
+				"Sla",
+				"SlaveProject"
+			],
+			[
+				"so",
+				"something_non_trivial\tfunction"
+			],
+			[
+				"im",
+				"import_module\tfunction"
+			],
+			[
+				"import",
+				"importlib\tmodule"
+			],
+			[
+				"po",
+				"project"
+			],
+			[
+				"Tr",
+				"Track\tclass"
+			],
+			[
+				"s_tr",
+				"s_tracks"
+			],
+			[
 				"_child",
 				"_childs_matched_secondary\tstatement"
 			],
@@ -30,10 +62,6 @@
 			[
 				"Ou",
 				"MasterOutTrack\tclass"
-			],
-			[
-				"import",
-				"import_module\tfunction"
 			],
 			[
 				"some",
@@ -94,10 +122,6 @@
 			[
 				"track",
 				"out_track"
-			],
-			[
-				"_chi",
-				"_childs_are_receives"
 			],
 			[
 				"chi",
@@ -202,10 +226,6 @@
 			[
 				"Fx",
 				"FX\tclass"
-			],
-			[
-				"Tr",
-				"Track"
 			],
 			[
 				"Type",
@@ -494,39 +514,20 @@
 			[
 				"sess",
 				"session_management\tmodule"
-			],
-			[
-				"ports",
-				"ports_used\tstatement"
-			],
-			[
-				"Conte",
-				"contextmanager\tfunction"
-			],
-			[
-				"Con",
-				"ContextManager\tstatement"
-			],
-			[
-				"monk",
-				"monkeypatch\tparam"
-			],
-			[
-				"o_s",
-				"o_s_hosts\tstatement"
 			]
 		]
 	},
 	"buffers":
 	[
 		{
-			"contents": "import typing as ty\nimport pytest as pt\nimport mock\nimport reapy as rpr\nfrom reapy import reascript_api as RPR\nfrom .. import session as ss\nfrom . import MASTER_PROJ_NAME, SLAVE_PROJECT_NAME\n\n# from time import sleep\n\n\n# @pt.mark.skip\n@pt.mark.skipif(\n    not rpr.dist_api_is_enabled(), reason='not connected to reaper'\n)\n@rpr.inside_reaper()\ndef test_master_out_track():\n    m_pr = ss.Project(MASTER_PROJ_NAME)\n    s_pr = ss.SlaveProject(SLAVE_PROJECT_NAME, 'localhost')\n    m_pr.make_current_project()\n    m_tr = rpr.Track(id='out', project=m_pr)\n    # print(s_pr.__module__, s_pr.__qualname__)\n    with s_pr.make_current_project():\n        s_tr = rpr.Track(id='in', project=s_pr)\n    o_track = ss.MasterOutTrack(\n        track=m_tr, slave=s_pr, target=ss.SlaveInTrack(s_tr)\n    )\n\n    o_childs = o_track.childs\n    assert rpr.Track(\n        id='no_midi_send', project=ss.Project(MASTER_PROJ_NAME)\n    ).id not in o_childs\n    assert len(o_childs) == 18\n\n    matched = o_track.match_childs()\n    m_id = rpr.Track(id='B4', project=m_pr).id\n    with s_pr.make_current_project():\n        assert matched[m_id].target.track == rpr.Track(id='B4', project=s_pr)\n\n    m_id = rpr.Track(id='B3Ch4', project=m_pr).id\n    with s_pr.make_current_project():\n        assert matched[m_id].target.track == rpr.Track(\n            id='B3Ch4', project=s_pr\n        )\n\n    m_id = rpr.Track(id='B4Ch1B1', project=m_pr).id\n    with s_pr.make_current_project():\n        assert matched[m_id].target.track == rpr.Track(\n            id='B4Ch1', project=s_pr\n        )\n\n    m_id = rpr.Track(id='B2Ch1B1', project=m_pr).id\n    with s_pr.make_current_project():\n        assert matched[m_id].target.track == rpr.Track(\n            id='B2Ch1B1', project=s_pr\n        )\n\n\n@pt.mark.skipif(\n    not rpr.dist_api_is_enabled(), reason='not connected to reaper'\n)\n@rpr.inside_reaper()\n@mock.patch.object(rpr, 'connect')\ndef test_slave_track(mConnect):\n    host = '192.168.2.1'\n    pr = ss.SlaveProject(id=SLAVE_PROJECT_NAME, host=host)\n    with pr.make_current_project():\n        tr = ss.SlaveInTrack(rpr.Track('in', project=pr))\n    rpr.Project(MASTER_PROJ_NAME).make_current_project()\n    with tr.connect():\n        mConnect.assert_called_with(host)\n        assert tr.track.name == 'in'\n    assert tr.track.name == ''\n\n@pt.mark.skipif(\n    not rpr.dist_api_is_enabled(), reason='not connected to reaper'\n)\n@rpr.inside_reaper()\ndef test_recarm():\n    host = 'localhost'\n    s_pr = ss.SlaveProject(id=SLAVE_PROJECT_NAME, host=host)\n    with s_pr.make_current_project():\n        s_tracks = {}\n        for name in ['B1', 'B1Ch1', 'B4']\n    m_pr = rpr.Project(id=MASTER_PROJ_NAME)\n    m_pr.make_current_project()\n    o_tr = ss.MasterOutTrack(rpr.Track(''), slave: SlaveProject, target: SlaveInTrack)\n\n\n\nclass MonkeySessTrack:\n\n    def __init__(\n        self,\n        id: str,\n        buses_packed: bool = False,\n        buses_unpacked: bool = False\n    ) -> None:\n        self.id_ = id\n        self.buses_packed = buses_packed\n        self.buses_unpacked = buses_unpacked\n\n    @property\n    def target(self) -> 'MonkeySessTrack':\n        return self._target\n\n    @target.setter\n    def target(self, track: 'MonkeySessTrack') -> None:\n        self._target = track\n\n    def __repr__(self) -> str:\n        return f'Track({self.id_}) target = Track({self.target.id_})'\n\n    def __eq__(self, other: object) -> bool:\n        if not isinstance(other, MonkeySessTrack):\n            return False\n        if self.id_ == other.id_:\n            return True\n        return False\n\n\ndef test_child_address():\n    ad1 = ss.ChildAddress(1, 2)\n    assert ad1.bus == 1\n    assert ad1 == (1, 2)\n    assert isinstance(ad1, ss.ChildAddress)\n    assert ad1 == (1, 0)\n    assert ad1 == (0, 2)\n    assert ad1 != (0, 1)\n    assert ad1 != (2, 2)\n    assert ad1 != (1, 2, 3)\n    # test for `exists`\n    assert ad1 in ((0, 1), (3, 4), (1, 2))\n\n\n# @mock.patch('ss.Track')\n@mock.patch.object(ss, 'Track', MonkeySessTrack)\ndef test_childs_tree():\n    tracks_out = {\n        'B1Chall': ss.Track('B1Chall'),\n        'B2Chall': ss.Track('B2Chall'),\n        'B3Chall': ss.Track('B3Chall', buses_packed=True),\n        'B3ChallB1Ch1': ss.Track('B3ChallB1Ch1'),\n        'B3ChallB1Ch2': ss.Track('B3ChallB1Ch2'),\n        'B4Chall': ss.Track('B4Chall', buses_packed=True),\n        'B4ChallB2Ch1': ss.Track('B4ChallB2Ch1'),\n        'B4ChallB2Ch2': ss.Track('B4ChallB2Ch2'),\n        'B5Chall': ss.Track('B5Chall', buses_packed=True),\n        'B5ChallB1Ch1': ss.Track('B5ChallB1Ch1'),\n        'B5ChallB2Ch1': ss.Track('B5ChallB2Ch1'),\n        'B5ChallB2Ch1B1Chall': ss.Track('B5ChallB2Ch1B1Chall'),\n        'B5ChallB2Ch1B2Chall': ss.Track('B5ChallB2Ch1B2Chall'),\n    }\n    tracks_in = {\n        'B1Chall': ss.Track('B1Chall'),\n        'B2Chall': ss.Track('B2Chall'),\n        'B3Chall': ss.Track('B3Chall', buses_unpacked=True),\n        'B3ChallB1Ch1': ss.Track('B3ChallB1Ch1'),\n        'B3ChallB1Ch2': ss.Track('B3ChallB1Ch2'),\n        'B4Chall': ss.Track('B4Chall'),\n        'B5Chall': ss.Track('B5Chall', buses_unpacked=True),\n        'B5ChallB2Ch1': ss.Track('B5ChallB2Ch1'),\n        'B5ChallB2Ch2': ss.Track('B5ChallB2Ch2'),\n    }\n    assert tracks_out['B1Chall'].id_ == \"B1Chall\"\n    tree_out = {\n        ss.ChildAddress(1, 0):\n            ss.Child(track=tracks_out['B1Chall']),\n        ss.ChildAddress(2, 0):\n            ss.Child(track=tracks_out['B2Chall']),\n        ss.ChildAddress(3, 0):\n            ss.Child(\n                track=tracks_out['B3Chall'],\n                childs={\n                    ss.ChildAddress(1, 1):\n                        ss.Child(tracks_out['B3ChallB1Ch1']),\n                    ss.ChildAddress(1, 2):\n                        ss.Child(tracks_out['B3ChallB1Ch2'])\n                }\n            ),\n        ss.ChildAddress(4, 0):\n            ss.Child(\n                track=tracks_out['B4Chall'],\n                childs={\n                    ss.ChildAddress(2, 1):\n                        ss.Child(tracks_out['B4ChallB2Ch1']),\n                    ss.ChildAddress(2, 2):\n                        ss.Child(tracks_out['B4ChallB2Ch2'])\n                }\n            ),\n        ss.ChildAddress(5, 0):\n            ss.Child(\n                track=tracks_out['B5Chall'],\n                childs={\n                    ss.ChildAddress(1, 1):\n                        ss.Child(tracks_out['B5ChallB1Ch1']),\n                    ss.ChildAddress(2, 1):\n                        ss.Child(\n                            tracks_out['B5ChallB2Ch1'],\n                            childs={\n                                ss.ChildAddress(1, 0):\n                                    ss.Child(\n                                        tracks_out['B5ChallB2Ch1B1Chall']\n                                    ),\n                                ss.ChildAddress(2, 0):\n                                    ss.Child(\n                                        tracks_out['B5ChallB2Ch1B2Chall']\n                                    ),\n                            }\n                        ),\n                }\n            ),\n    }\n    tree_in = {\n        ss.ChildAddress(1, 0):\n            ss.Child(track=tracks_in['B1Chall']),\n        ss.ChildAddress(2, 0):\n            ss.Child(track=tracks_in['B2Chall']),\n        ss.ChildAddress(3, 0):\n            ss.Child(\n                track=tracks_in['B3Chall'],\n                childs={\n                    ss.ChildAddress(1, 1): ss.Child(tracks_in['B3ChallB1Ch1']),\n                    ss.ChildAddress(1, 2): ss.Child(tracks_in['B3ChallB1Ch2'])\n                }\n            ),\n        ss.ChildAddress(4, 0):\n            ss.Child(track=tracks_in['B4Chall']),\n        ss.ChildAddress(5, 0):\n            ss.Child(\n                track=tracks_in['B5Chall'],\n                childs={\n                    ss.ChildAddress(2, 1): ss.Child(tracks_in['B5ChallB2Ch1']),\n                    ss.ChildAddress(2, 2): ss.Child(tracks_in['B5ChallB2Ch2'])\n                }\n            ),\n    }\n    init_target = ss.Track('slave_in')\n    # tracks matched primary\\secondary\n    t_m_p, t_m_s = ss.Child.match(tree_out, tree_in, init_target)\n    # simple case\n    assert t_m_p['B1Chall'].target is tracks_in['B1Chall']\n    # complex case\n    assert t_m_s['B4ChallB2Ch2'].target is tracks_in['B4Chall']\n    # too complex case\n    assert t_m_s['B4ChallB2Ch1'].target is tracks_in['B4Chall']\n    assert t_m_s['B4ChallB2Ch2'].target is tracks_in['B4Chall']\n    assert t_m_s['B5ChallB2Ch1B2Chall'].target is tracks_in['B5ChallB2Ch1']\n\n\n# @pt.mark.skip\n@pt.mark.skipif(\n    not rpr.dist_api_is_enabled(), reason='not connected to reaper'\n)\ndef test_get_childs_tree():\n    # test straight\n    track = ss.Track(\n        rpr.Track(id='B4Ch1', project=rpr.Project(MASTER_PROJ_NAME))\n    )\n    tree = track.get_childs_tree()\n    assert tree[(1, 0)].track.name == 'B4Ch1B1'\n    assert tree[(3, 0)].track.name == 'B4Ch1B3'\n    # test recursive\n    track = ss.Track(rpr.Track(id='B4', project=rpr.Project(MASTER_PROJ_NAME)))\n    tree = track.get_childs_tree()\n    assert tree[(0, 1)].track.name == 'B4Ch1'\n    assert tree[(0, 1)].childs[(1, 0)].track.name == 'B4Ch1B1'\n\n\n@pt.mark.skipif(\n    not rpr.dist_api_is_enabled(), reason='not connected to reaper'\n)\ndef test_bus_packed():\n\n    def track(id: str) -> ss.Track:\n        r_tr = rpr.Track(id=id, project=rpr.Project(MASTER_PROJ_NAME))\n        return ss.Track(r_tr)\n\n    tr = track('B2Ch1')\n    assert tr.buses_packed is True\n    assert tr.buses_unpacked is False\n    tr = track('unpacked')\n    assert tr.buses_packed is False\n    assert tr.buses_unpacked is True\n",
+			"contents": "import typing as ty\nimport pytest as pt\nimport mock\nimport reapy as rpr\nfrom reapy import reascript_api as RPR\nfrom .. import session as ss\nfrom . import MASTER_PROJ_NAME, SLAVE_PROJECT_NAME\n\n# from time import sleep\n\n\n@pt.mark.skipif(\n    not rpr.dist_api_is_enabled(), reason='not connected to reaper'\n)\ndef test_project():\n    pr = ss.Project('test_master')\n    assert pr.last_ip == 'localhost'\n\n\n# @pt.mark.skip\n@pt.mark.skipif(\n    not rpr.dist_api_is_enabled(), reason='not connected to reaper'\n)\n@rpr.inside_reaper()\ndef test_master_out_track():\n    m_pr = ss.Project(MASTER_PROJ_NAME)\n    s_pr = ss.SlaveProject(SLAVE_PROJECT_NAME, 'localhost')\n    m_pr.make_current_project()\n    # m_tr = rpr.Track(id='out', project=m_pr)\n    # print(s_pr.__module__, s_pr.__qualname__)\n    with s_pr.make_current_project():\n        s_tr = ss.SlaveInTrack(id='in', project=s_pr)type(ch_tr)\n    o_track = ss.MasterOutTrack(id='out', project=m_pr, target=s_tr)\n    # print(type(o_track.project))\n\n    o_childs = o_track.childs\n    assert rpr.Track(\n        id='no_midi_send', project=ss.Project(MASTER_PROJ_NAME)\n    ).id not in o_childs\n    assert len(o_childs) == 18\n\n    matched = o_track.match_childs()\n    m_id = rpr.Track(id='B4', project=m_pr).id\n    with s_pr.make_current_project():\n        assert matched[m_id].target == rpr.Track(id='B4', project=s_pr)\n\n    m_id = rpr.Track(id='B3Ch4', project=m_pr).id\n    with s_pr.make_current_project():\n        assert matched[m_id].target == rpr.Track(id='B3Ch4', project=s_pr)\n\n    m_id = rpr.Track(id='B4Ch1B1', project=m_pr).id\n    with s_pr.make_current_project():\n        assert matched[m_id].target == rpr.Track(id='B4Ch1', project=s_pr)\n\n    m_id = rpr.Track(id='B2Ch1B1', project=m_pr).id\n    with s_pr.make_current_project():\n        assert matched[m_id].target == rpr.Track(id='B2Ch1B1', project=s_pr)\n\n\n@pt.mark.skipif(\n    not rpr.dist_api_is_enabled(), reason='not connected to reaper'\n)\n@rpr.inside_reaper()\n@mock.patch.object(rpr, 'connect')\ndef test_slave_track(mConnect):\n    host = '192.168.2.1'\n    pr = ss.SlaveProject(id=SLAVE_PROJECT_NAME, ip=host)\n    with pr.make_current_project():\n        tr = ss.SlaveInTrack(id='in', project=pr)\n    rpr.Project(MASTER_PROJ_NAME).make_current_project()\n    with tr.connect():\n        mConnect.assert_called_with(host)\n        assert tr.name == 'in'\n    assert tr.name == ''\n\n\n# @pt.mark.skipif(\n#     not rpr.dist_api_is_enabled(), reason='not connected to reaper'\n# )\n# @rpr.inside_reaper()\n# def test_recarm():\n#     host = 'localhost'\n#     s_pr = ss.SlaveProject(id=SLAVE_PROJECT_NAME, host=host)\n#     with s_pr.make_current_project():\n#         s_tracks = {}\n#         for name in ['B1', 'B1Ch1', 'B4']:\n#             s_tracks[name] = ss.Track(rpr.Track(id=name, project=s_pr))\n#     m_pr = rpr.Project(id=MASTER_PROJ_NAME)\n#     m_pr.make_current_project()\n#     o_tracks = {}\n#     for name in ['B1', 'B1Ch1', 'B4Ch']\n#     # o_tr = ss.MasterOutTrack(rpr.Track(''), slave=s_pr, target: SlaveInTrack)\n\n\nclass MonkeySessTrack:\n\n    def __init__(\n        self,\n        id: str,\n        buses_packed: bool = False,\n        buses_unpacked: bool = False\n    ) -> None:\n        self.id = id\n        self.buses_packed = buses_packed\n        self.buses_unpacked = buses_unpacked\n\n    @property\n    def target(self) -> 'MonkeySessTrack':\n        return self._target\n\n    @target.setter\n    def target(self, track: 'MonkeySessTrack') -> None:\n        self._target = track\n\n    def __repr__(self) -> str:\n        return f'Track({self.id}) target = Track({self.target.id})'\n\n    def __eq__(self, other: object) -> bool:\n        if not isinstance(other, MonkeySessTrack):\n            return False\n        if self.id == other.id:\n            return True\n        return False\n\n\ndef test_child_address():\n    ad1 = ss.ChildAddress(1, 2)\n    assert ad1.bus == 1\n    assert ad1 == (1, 2)\n    assert isinstance(ad1, ss.ChildAddress)\n    assert ad1 == (1, 0)\n    assert ad1 == (0, 2)\n    assert ad1 != (0, 1)\n    assert ad1 != (2, 2)\n    assert ad1 != (1, 2, 3)\n    # test for `exists`\n    assert ad1 in ((0, 1), (3, 4), (1, 2))\n\n\n# @mock.patch('ss.Track')\n@mock.patch.object(ss, 'Track', MonkeySessTrack)\ndef test_childs_tree():\n    tracks_out = {\n        'B1Chall': ss.Track('B1Chall'),\n        'B2Chall': ss.Track('B2Chall'),\n        'B3Chall': ss.Track('B3Chall', buses_packed=True),\n        'B3ChallB1Ch1': ss.Track('B3ChallB1Ch1'),\n        'B3ChallB1Ch2': ss.Track('B3ChallB1Ch2'),\n        'B4Chall': ss.Track('B4Chall', buses_packed=True),\n        'B4ChallB2Ch1': ss.Track('B4ChallB2Ch1'),\n        'B4ChallB2Ch2': ss.Track('B4ChallB2Ch2'),\n        'B5Chall': ss.Track('B5Chall', buses_packed=True),\n        'B5ChallB1Ch1': ss.Track('B5ChallB1Ch1'),\n        'B5ChallB2Ch1': ss.Track('B5ChallB2Ch1'),\n        'B5ChallB2Ch1B1Chall': ss.Track('B5ChallB2Ch1B1Chall'),\n        'B5ChallB2Ch1B2Chall': ss.Track('B5ChallB2Ch1B2Chall'),\n    }\n    tracks_in = {\n        'B1Chall': ss.Track('B1Chall'),\n        'B2Chall': ss.Track('B2Chall'),\n        'B3Chall': ss.Track('B3Chall', buses_unpacked=True),\n        'B3ChallB1Ch1': ss.Track('B3ChallB1Ch1'),\n        'B3ChallB1Ch2': ss.Track('B3ChallB1Ch2'),\n        'B4Chall': ss.Track('B4Chall'),\n        'B5Chall': ss.Track('B5Chall', buses_unpacked=True),\n        'B5ChallB2Ch1': ss.Track('B5ChallB2Ch1'),\n        'B5ChallB2Ch2': ss.Track('B5ChallB2Ch2'),\n    }\n    assert tracks_out['B1Chall'].id == \"B1Chall\"\n    tree_out = {\n        ss.ChildAddress(1, 0):\n            ss.Child(track=tracks_out['B1Chall']),\n        ss.ChildAddress(2, 0):\n            ss.Child(track=tracks_out['B2Chall']),\n        ss.ChildAddress(3, 0):\n            ss.Child(\n                track=tracks_out['B3Chall'],\n                childs={\n                    ss.ChildAddress(1, 1):\n                        ss.Child(tracks_out['B3ChallB1Ch1']),\n                    ss.ChildAddress(1, 2):\n                        ss.Child(tracks_out['B3ChallB1Ch2'])\n                }\n            ),\n        ss.ChildAddress(4, 0):\n            ss.Child(\n                track=tracks_out['B4Chall'],\n                childs={\n                    ss.ChildAddress(2, 1):\n                        ss.Child(tracks_out['B4ChallB2Ch1']),\n                    ss.ChildAddress(2, 2):\n                        ss.Child(tracks_out['B4ChallB2Ch2'])\n                }\n            ),\n        ss.ChildAddress(5, 0):\n            ss.Child(\n                track=tracks_out['B5Chall'],\n                childs={\n                    ss.ChildAddress(1, 1):\n                        ss.Child(tracks_out['B5ChallB1Ch1']),\n                    ss.ChildAddress(2, 1):\n                        ss.Child(\n                            tracks_out['B5ChallB2Ch1'],\n                            childs={\n                                ss.ChildAddress(1, 0):\n                                    ss.Child(\n                                        tracks_out['B5ChallB2Ch1B1Chall']\n                                    ),\n                                ss.ChildAddress(2, 0):\n                                    ss.Child(\n                                        tracks_out['B5ChallB2Ch1B2Chall']\n                                    ),\n                            }\n                        ),\n                }\n            ),\n    }\n    tree_in = {\n        ss.ChildAddress(1, 0):\n            ss.Child(track=tracks_in['B1Chall']),\n        ss.ChildAddress(2, 0):\n            ss.Child(track=tracks_in['B2Chall']),\n        ss.ChildAddress(3, 0):\n            ss.Child(\n                track=tracks_in['B3Chall'],\n                childs={\n                    ss.ChildAddress(1, 1): ss.Child(tracks_in['B3ChallB1Ch1']),\n                    ss.ChildAddress(1, 2): ss.Child(tracks_in['B3ChallB1Ch2'])\n                }\n            ),\n        ss.ChildAddress(4, 0):\n            ss.Child(track=tracks_in['B4Chall']),\n        ss.ChildAddress(5, 0):\n            ss.Child(\n                track=tracks_in['B5Chall'],\n                childs={\n                    ss.ChildAddress(2, 1): ss.Child(tracks_in['B5ChallB2Ch1']),\n                    ss.ChildAddress(2, 2): ss.Child(tracks_in['B5ChallB2Ch2'])\n                }\n            ),\n    }\n    init_target = ss.Track('slave_in')\n    # tracks matched primary\\secondary\n    t_m_p, t_m_s = ss.Child.match(tree_out, tree_in, init_target)\n    # simple case\n    assert t_m_p['B1Chall'].target is tracks_in['B1Chall']\n    # complex case\n    assert t_m_s['B4ChallB2Ch2'].target is tracks_in['B4Chall']\n    # too complex case\n    assert t_m_s['B4ChallB2Ch1'].target is tracks_in['B4Chall']\n    assert t_m_s['B4ChallB2Ch2'].target is tracks_in['B4Chall']\n    assert t_m_s['B5ChallB2Ch1B2Chall'].target is tracks_in['B5ChallB2Ch1']\n\n\n# @pt.mark.skip\n@pt.mark.skipif(\n    not rpr.dist_api_is_enabled(), reason='not connected to reaper'\n)\ndef test_get_childs_tree():\n    # test straight\n    track = ss.Track(id='B4Ch1', project=rpr.Project(MASTER_PROJ_NAME))\n\n    tree = track.get_childs_tree()\n    assert tree[(1, 0)].track.name == 'B4Ch1B1'\n    assert tree[(3, 0)].track.name == 'B4Ch1B3'\n    # test recursive\n    track = ss.Track(id='B4', project=rpr.Project(MASTER_PROJ_NAME))\n    tree = track.get_childs_tree()\n    assert tree[(0, 1)].track.name == 'B4Ch1'\n    assert tree[(0, 1)].childs[(1, 0)].track.name == 'B4Ch1B1'\n\n\n@pt.mark.skipif(\n    not rpr.dist_api_is_enabled(), reason='not connected to reaper'\n)\ndef test_bus_packed():\n\n    def track(id: str) -> ss.Track:\n        return ss.Track(id=id, project=rpr.Project(MASTER_PROJ_NAME))\n        # return ss.Track(r_tr)\n\n    tr = track('B2Ch1')\n    assert tr.buses_packed is True\n    assert tr.buses_unpacked is False\n    tr = track('unpacked')\n    assert tr.buses_packed is False\n    assert tr.buses_unpacked is True\n",
 			"file": "session_management/tests/test_session.py",
-			"file_size": 9034,
-			"file_write_time": 132290549327939299,
+			"file_size": 9730,
+			"file_write_time": 132292685339785619,
 			"settings":
 			{
-				"buffer_size": 9533,
+				"buffer_size": 9741,
+				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
@@ -560,8 +561,32 @@
 			"file": "session_management/session.py",
 			"settings":
 			{
-				"buffer_size": 17476,
+				"buffer_size": 15810,
 				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/levitanus/gits/reapy/reapy/core/__init__.py",
+			"settings":
+			{
+				"buffer_size": 1017,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/levitanus/gits/reapy/reapy/core/track/__init__.py",
+			"settings":
+			{
+				"buffer_size": 103,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/levitanus/gits/reapy/reapy/core/track/track.py",
+			"settings":
+			{
+				"buffer_size": 16717,
 				"line_ending": "Unix"
 			}
 		},
@@ -781,6 +806,9 @@
 	],
 	"file_history":
 	[
+		"/home/levitanus/.config/sublime-text-3/Packages/Anaconda/Default (Linux).sublime-keymap",
+		"/home/levitanus/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap",
+		"/home/levitanus/.config/sublime-text-3/Packages/Anaconda/Anaconda.sublime-settings",
 		"/home/levitanus/gits/session-management/session_management/simple_test2.py",
 		"/home/levitanus/gits/session-management/session_management/tests/test_persistence.py",
 		"/home/levitanus/gits/reapy/reapy/core/project/project.py",
@@ -809,7 +837,6 @@
 		"/home/levitanus/.local/lib/python3.7/site-packages/jack.py",
 		"/home/levitanus/.config/sublime-text-3/Packages/User/AutoDocstring.sublime-settings",
 		"/home/levitanus/.config/sublime-text-3/Packages/AutoDocstring/AutoDocstring.sublime-settings",
-		"/home/levitanus/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap",
 		"/home/levitanus/.config/sublime-text-3/Packages/AutoDocstring/Default (Linux).sublime-keymap",
 		"/home/levitanus/.config/sublime-text-3/Packages/User/SublimePython.sublime-settings",
 		"/home/levitanus/.config/sublime-text-3/Packages/SublimePythonIDE/SublimePython.sublime-settings",
@@ -906,9 +933,7 @@
 		"/home/levitanus/.config/sublime-text-3/Packages/Python Improved/README.md",
 		"/home/levitanus/.config/sublime-text-3/Packages/User/NeonSolarized.tmTheme",
 		"/home/levitanus/.config/sublime-text-3/Packages/User/NeonSolorized.tmTheme",
-		"/home/levitanus/.config/sublime-text-3/Packages/User/updated_solarized/Updated Solarized (dark).sublime-color-scheme",
-		"/home/levitanus/gits/session-management/session_management/projects.py",
-		"/home/levitanus/.config/sublime-text-3/Packages/Solarized Color Scheme.sublime-package_FILES/Solarized (dark).sublime-color-scheme"
+		"/home/levitanus/.config/sublime-text-3/Packages/User/updated_solarized/Updated Solarized (dark).sublime-color-scheme"
 	],
 	"find":
 	{
@@ -927,6 +952,8 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"id_",
+			"track.id_",
 			"is_connected",
 			"rpr.Project",
 			"rpr",
@@ -1052,9 +1079,7 @@
 			"audio_guid",
 			"local",
 			"objects",
-			"gui",
-			"GUI_button2",
-			"gfx"
+			"gui"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -1086,15 +1111,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 9533,
+						"buffer_size": 9741,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1078,
-								1078
+								986,
+								986
 							]
 						],
 						"settings":
@@ -1279,12 +1304,37 @@
 								"SL.flake8.Highlights.|88a469ea2d090ce660ceed0ae59ff321265c46c3f24aef9f79651e1fbc410398|region.yellowish markup.error.sublime_linter|32",
 								"SL.mypy.Gutter.|region.orangish markup.error.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/x.png"
 							],
+							"SL.81.region_keys":
+							[
+								"SL.pycodestyle.Gutter.|region.greenish markup.error.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/pointer.png",
+								"SL.mypy.Gutter.|region.orangish markup.error.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/x.png",
+								"SL.flake8.Highlights.|9925b0b10ae863c3f954c64d8d55e1178b67eb1fe0ee0c66490f6c3f6e731a46|region.yellowish markup.warning.sublime_linter|32",
+								"SL.mypy.Highlights.|ed64c48cb772800c048757b4d8f8b662be990995c91c505be2c4000bda997a9f|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|2570b08e79b28661e7c8f32619fed8320faa581e5dd1aa5566997e38aa3e17c9|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|45c2da8e2e534278a921e6ca53ab6d8f0559e34e0663f4f28dc2e7013bed78f8|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|88db2064de886d4c3c271a681786031ca9dea879b904f06088b55511340013d4|region.orangish markup.error.sublime_linter|256",
+								"sublime_linter.protected_regions",
+								"SL.mypy.Highlights.|2dab24c76900a936f48ed2ba5cdd209510297fbd125fcf48169b77703d11a92f|region.orangish markup.error.sublime_linter|256",
+								"SL.flake8.Highlights.|d142c567dd25f6fb44590865c286aaaa16f4b1cc30bf4f91890753f015acb590|region.yellowish markup.warning.sublime_linter|32",
+								"SL.pycodestyle.Highlights.|31f81605ab79cc2d688f19f7654d844236d1886ccc310d18c0b642ff8a17e2c0|region.greenish markup.error.sublime_linter|1316",
+								"SL.mypy.Highlights.|31bd593dc1fc3fe55ae38972695646bef7943e70280f8e60ff522c79b0b8c5a6|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|1129d49eb44179b6bc998bad98631d2ec2bb21e3e149e546f941fbfa1a45d1bf|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|c3b368d0e1cc6d514e8bf2029e7356b907acb1731cb4d407b3bc9632c672eac8|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|302d7271e313951d37e9f3252f45bad9164be02df0cb2e02160c56e1b33cb0da|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|25f0aa44e53c8294b5ac6c0e381fad3c632a5b866e22663435274b4594759b5c|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|4cb5bedbe157c183c9c3affdc417436effe673859a8411e3f0dd2ba26f014275|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|ed9a60d0eee01726c47a0a0e8459e48c72d204b7ccec3c7c8c4de8ad7fae7cae|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|f7aead464815e905de2b7585514e9798af6f33c8f0019e3b16f4fb43d6e9934e|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|88a2d629113e3b0edb2bc791e62ccbdad82224f89a925211d5672e0c701d89a5|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|00ad794ad4ef04c613a5402ec409fd38d1ba7421f2dffce9b322ab305843c44c|region.orangish markup.error.sublime_linter|256",
+								"SL.flake8.Gutter.|region.yellowish markup.warning.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/triangle.png"
+							],
 							"complete_parameters": false,
 							"show_definitions": false,
 							"syntax": "Packages/Python/Python.sublime-syntax"
 						},
 						"translation.x": 0.0,
-						"translation.y": 255.0,
+						"translation.y": 306.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 1,
@@ -1315,7 +1365,7 @@
 						"translation.y": 1173.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 8,
 					"type": "text"
 				},
 				{
@@ -1350,7 +1400,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 7,
+					"stack_index": 10,
 					"type": "text"
 				}
 			]
@@ -1569,6 +1619,11 @@
 								"SL.flake8.Highlights.|b3627300cf9155cc2d366153a87115b3e6a60ae747e23e7d5f80eb4b98ae299e|region.yellowish markup.warning.sublime_linter|1316",
 								"SL.mypy.Highlights.|d2985dd96202b57b76d2a4a6752cea24f6e940e9b0bf6fc0e68fd49a17baf1e9|region.orangish markup.error.sublime_linter|256"
 							],
+							"SL.84.region_keys":
+							[
+								"sublime_linter.protected_regions"
+							],
+							"complete_all_parameters": false,
 							"complete_parameters": false,
 							"syntax": "Packages/Python/Python.sublime-syntax"
 						},
@@ -1576,7 +1631,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 5,
 					"type": "text"
 				},
 				{
@@ -1585,15 +1640,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 17476,
+						"buffer_size": 15810,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								12489,
-								12489
+								10545,
+								10545
 							]
 						],
 						"settings":
@@ -1729,13 +1784,41 @@
 								"SL.flake8.Gutter.|region.yellowish markup.warning.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/triangle.png",
 								"SL.pycodestyle.Highlights.|ff9ec50515a93b1ec6c46f4c88849e31f95ce60ad3e9260747484353503c8372|region.greenish markup.error.sublime_linter|1316"
 							],
+							"SL.85.region_keys":
+							[
+								"SL.pycodestyle.Gutter.|region.greenish markup.error.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/pointer.png",
+								"SL.pycodestyle.Highlights.|a0879810b5aee456906d0d5087df7c8797fe9de72f4561738c2992b10c2f4786|region.greenish markup.error.sublime_linter|1316",
+								"SL.mypy.Highlights.|51c4b93cd111b5b3afa8c3b68495d4ffe339e1e8b97fc2672e659c601be2da43|region.redish markup.error.sublime_linter|32",
+								"SL.mypy.Gutter.|region.orangish markup.error.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/x.png",
+								"SL.mypy.Highlights.|8794f438c75cd45eac3afa2c8475a018e164a6535b5ebe5b9201a86e07e411ea|region.orangish markup.error.sublime_linter|256",
+								"SL.flake8.Gutter.|region.yellowish markup.error.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/triangle.png",
+								"SL.mypy.Highlights.|39dbfe816ce2c772bc34cec3d5eaab60fb1f30d017ef8184ad7535bce3e47e58|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|b8eec8f741e02b91e388a55e8c7399e2e8989935a84bc4eae442ff1be667e427|region.orangish markup.error.sublime_linter|256",
+								"SL.flake8.Highlights.|44f08e48c0303dde43bb3302b69a39ee94df6b726d5645e4624ea3f90d65d11c|region.yellowish markup.error.sublime_linter|804",
+								"SL.mypy.Highlights.|adc6ced57198fe3682ef333243190806b573c9786e318fc476163d8034e8c7cd|region.redish markup.error.sublime_linter|32",
+								"SL.mypy.Highlights.|2cac995d7b840e0f3a99daa8ed8fb1e509637a51cac0d36f8dc17d1c1984c631|region.orangish markup.error.sublime_linter|256",
+								"sublime_linter.protected_regions",
+								"SL.flake8.Highlights.|702b856e89b937c081519c816f6fc1129782e6b63100d8bcbd60f74e98f9dc25|region.yellowish markup.error.sublime_linter|804",
+								"SL.flake8.Highlights.|23f8ce26381b32c740be242b397d6ce2fc3eb66b71fbf93709c9a0354992d866|region.yellowish markup.warning.sublime_linter|32",
+								"SL.flake8.Highlights.|7176267c44f88ac9092054abc2e1176c43b4f08d9e4cd808757f75f769290a88|region.yellowish markup.warning.sublime_linter|32",
+								"SL.flake8.Highlights.|7c2ce802c37b83e9f6b88b21938c45ce550e23342cbaae18cd6a7161ec5a7104|region.yellowish markup.warning.sublime_linter|1316",
+								"SL.flake8.Highlights.|911f3c538235aacaaf243e4ae46c7957256cf75a572e07cda50bee03e741faf1|region.yellowish markup.warning.sublime_linter|1316",
+								"SL.mypy.Gutter.|region.redish markup.error.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/x.png",
+								"SL.mypy.Highlights.|b8f78b293cf50473fffba74b81d4fd647a6bbed2134047e56a43b32d8ca5d861|region.redish markup.error.sublime_linter|32",
+								"SL.mypy.Highlights.|6e815fd81accf38e20ab6491786331ccd06c93cd517a30da42a3c14c3be9a160|region.redish markup.error.sublime_linter|32",
+								"SL.flake8.Highlights.|6a5b7bad7b2e60c419ad7e674b8a3404cb1d4a78e09392f799f05d127e440f40|region.yellowish markup.warning.sublime_linter|1316",
+								"SL.mypy.Highlights.|b762d7e8eb439df5e462a695e7af6eb086aba6a7870a5d9219c5ec1dceada5b1|region.orangish markup.error.sublime_linter|256",
+								"SL.flake8.Highlights.|eda66e2ffe3663de947546d2ce6d86521b2f5207064c222cfab1280edb8742f0|region.yellowish markup.error.sublime_linter|804",
+								"SL.mypy.Highlights.|83bc672969af2434d76e810306bf44c79ff18e1c345db4695073d1d8fe43bea7|region.orangish markup.error.sublime_linter|256",
+								"SL.flake8.Gutter.|region.yellowish markup.warning.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/triangle.png"
+							],
 							"complete_all_parameters": false,
 							"complete_parameters": false,
 							"show_definitions": false,
 							"syntax": "Packages/Python/Python.sublime-syntax"
 						},
 						"translation.x": 0.0,
-						"translation.y": 6736.0,
+						"translation.y": 5654.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
@@ -1743,6 +1826,186 @@
 				},
 				{
 					"buffer": 5,
+					"file": "/home/levitanus/gits/reapy/reapy/core/__init__.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1017,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								359,
+								359
+							]
+						],
+						"settings":
+						{
+							"SL.94.region_keys":
+							[
+							],
+							"syntax": "Packages/Python/Python.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "/home/levitanus/gits/reapy/reapy/core/track/__init__.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 103,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								86,
+								86
+							]
+						],
+						"settings":
+						{
+							"SL.95.region_keys":
+							[
+								"SL.flake8.Highlights.|912c72757f39957c7c40efa55459eb4b4bb4dc719c70269b76a85f1cd0a0dd21|region.yellowish markup.warning.sublime_linter|1316",
+								"SL.flake8.Highlights.|b5d72e3dd40ab3c7b22824e007edd531ffb4993d92617d1bde898c69def5db97|region.yellowish markup.warning.sublime_linter|1316",
+								"SL.flake8.Highlights.|083e78daf8eba068965b6703061d8f140a7ef3aeff7b9571a90e6f6624cb8b4c|region.yellowish markup.warning.sublime_linter|1316",
+								"SL.flake8.Highlights.|9cd082c35abc0fde4d53b477e28fd273d2480cba895bebc688b52d8a00d3b8ab|region.yellowish markup.warning.sublime_linter|1316",
+								"sublime_linter.protected_regions",
+								"SL.flake8.Gutter.|region.yellowish markup.warning.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/triangle.png"
+							],
+							"syntax": "Packages/Python/Python.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "/home/levitanus/gits/reapy/reapy/core/track/track.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 16717,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								160,
+								160
+							]
+						],
+						"settings":
+						{
+							"SL.96.region_keys":
+							[
+								"SL.mypy.Highlights.|3b68f67c1071d0fffd17f2dead493f56919deed2219f27febde42f8808f9c3b7|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|7699de2bcea208e0b7773d626c379e7ad44f5bb6a814d39571ee26384bcacb32|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|3a0007f11d5829981cba4c4c35feb0aba0e9a0d09b3233e84538d36db1986e1c|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|af8ebcbc816812c4cd7be7cf4b80c7fb9cceb8db58f97d116f2b3d80fdc72ce3|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|6c507dfd20434436a43fb927584533fe6535d8b45bf67326af2a48ee608d1b27|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|c14dd82d5ea8bc2718e38893b242c26cf43599741620910821b1b280d4724eb5|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|d1e2a03e6facaa9035c7da5de4c4f374771d7b0539b3053eef09d5232c7d3898|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|8229d9c336c422d4d51b372eef8fc8e9d621f9d2204a64ebd190a0631ca4bb4b|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|074c32606cf0529f44e31af259d6a784c59ffd739490c9e5fa2e43b746085296|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|666c9f988cf51a3c567fab53d8d936aef6af60d9a8c83b797c155c303a846ed2|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|5b1b07a8f34041c4df0e5970a68c46710e6e54ce71aef6c67df3647d7d91e522|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|5fa9a34b9dcb71e2c4eb0054441afd486dac27accd9bcc9bfa39ec24e0e08400|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|5bdf5b8ec25f3f725d6426806d5f34fa093968684198a8d500a9b9c248007e5d|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|54e829985c41900a617ca488d62454bfb829ccb2284f4866bc2bc2e5194ae2c2|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|8ab46a1ccaa1c622e59ca8aefa3837625e32232d9bedb61319fe94405f2e4f51|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|1f044cce6792574aa26a4c3638c76f5f2de1ffc35b8e83c16fcb770ebed53482|region.orangish markup.error.sublime_linter|256",
+								"SL.pycodestyle.Highlights.|d165f0e55bb4adbae6ad45415757f3189df20b9b8da067ff6361d562fe3714d1|region.greenish markup.error.sublime_linter|1316",
+								"SL.mypy.Gutter.|region.orangish markup.error.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/x.png",
+								"SL.mypy.Highlights.|67a6b0920c6e798bbc2a9a0941c1a1d515cf1a722aa1ab5ab58b4b5760d54dcd|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|25259ea02ce8d26cc0d1e4a89e2134245a494bd57fa667a41c24735930992ce3|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|23f721507e1618bad19adf7f33d7f3ac603771f99fee661693992e4a77f97e7b|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|7dc894fd366ed331e7cf37e802c0da007d1fccca8d15de54cdc7ae784d4e9ddf|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|b8add4f18237311257142e504b9af4862cb2314dd579749ac9a617927677c725|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|49ff6a6cc6def0ab3883efa62dbfe0a74a7a99e8624bcb9bda412300c0cd4561|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|63f6e616d7c0e0f75214e5b77b50ebda518dbb09af37916311761ce24d032e82|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|f20f22dfd3770fa5a389e40b124745b6e835625ff8c0a5e123a190c51adca7cc|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|5eca806810045b636cdb891418753804f21958541b548798ded6d4a92bc64757|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|6ecf13d065d6bbdf0b23dc0c5efd07cc73e12004b5740b028f078397e03d1da1|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|a391040e10f3d432f9e60755cba8e33b831c74c92f72065109923a35fb0d4532|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|8a1eb982c8e786a4b9a220bcf25e306d167e12acb87a333c6c7c8c45f7060e76|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|bd82da4c665d0b830388b1472d82e837ca49d8c8b3690b5e8b5016a127bc559a|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|2a934e73043cdd602659d8ec55ccd0ba4c4db967f5deaece97781140de568712|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|19c0ff3863117892ea9b27fde6328a06247e67166f3db3a0f65251a5416cbfa4|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|a8b134c82dda312ef0786707b45118d9e6680b257a0678643c1f401630ee7ee1|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|a8f66772e9b56579c3ebb5f8e747aa5e6de51c6e2805b4629d83f54d97dec904|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|8aa1f697d051c06d3f98707a67d535a3f4546379bbbbdac09015fe72cbb2c62d|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|08d024e22c081eedc40829755650f54c1084ae7690fe90fe11fda67423bc515b|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|c1fd34392ae5058a351265d9f67c8106ef6242dfe4fd93a68eae7c32dde1529d|region.orangish markup.error.sublime_linter|256",
+								"SL.flake8.Gutter.|region.yellowish markup.warning.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/triangle.png",
+								"SL.mypy.Highlights.|f349ad37d117fd321ea7b120fbe3b172aabc6c69dd060c2f8c60c250b3b5b887|region.orangish markup.error.sublime_linter|256",
+								"SL.pycodestyle.Gutter.|region.greenish markup.error.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/pointer.png",
+								"SL.mypy.Highlights.|9f278fe74a0a8e5b39a682448eb214338ac8d7e767003b4aad9b3f4931a421b9|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|7511f3782712517bb8e2aa7b1306a3e87eba2df2132195457a4513786bee9823|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|3ffb84f74cfc190e1812155103e18d1afa5bdde5be9f56b9c41dbc58c8c39071|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|fca2adff3e8c77ff5f95241efa22b1a6641007ddc400e1bf915b4ad67dbb266f|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|3d6922cada1f29edf7ffb58b1e105077ae8fd802cd7e5d5798531e65f32da85c|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|7fc2a22ce5f52149af3061d1542680e575c1f38196cb729ad83a64a5ecececcf|region.orangish markup.error.sublime_linter|256",
+								"sublime_linter.protected_regions",
+								"SL.mypy.Highlights.|c907c040dbd34e6aec49462119f84f451e0609f4548af28c623f77ac50768359|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|a62015f6f80b488732ca13c9c23ceb3c333bc457f208cf290d7b8cf01431f2fc|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|cae7ad3256a4b65dfe4ce63413e4dce579a6d4f986fe988e44abbd37827f94fd|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|ffd6029e14f9862dddac7bfab8e85c9133a276611d9b20ba6f65594a03585ee5|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|20acdb9b737cb6e643ac2cdebebf8ea4e5d0a5bd4c2b7dc5cf6abed189f932ab|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|bfd9142f306003d49ef5753045ed5e8fef557ccbd254bca7b9784e6c6631f1be|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|cf64f15643052f81b20d6fce1ae742a4c1c03c343c34acb2b5cb7fbd5eb97d0b|region.orangish markup.error.sublime_linter|256",
+								"SL.pycodestyle.Highlights.|c820965dc85417f16bc5511f53580b16ba82662648dcc6a14f6fe62528b24f29|region.greenish markup.error.sublime_linter|1316",
+								"SL.flake8.Highlights.|c09c7a1fbbc600fdcb0cc10dd50ad1721b31c311ef7547ab2478f40722bc7e04|region.yellowish markup.warning.sublime_linter|1316",
+								"SL.mypy.Highlights.|4c229b56f47dd928a34719b5ef7a7af6ba6e84368d17511863542410d02521a5|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|4aee908dedeb02c357e7d581f2ef3b73cc9db3732bf3179d847c1e462b1bd6cd|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|eeb365e90bec26322ba9006a2b3f8f098982778d8513e160ec8491e26c46d29f|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|affa65883e9a8ed643a600d2ee7b85bc2133bafae9a38aa1490277776f04da52|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|a57242c1d407ef96a2bde0cc582136018cc5982aa91191103b8de1db4ebc15a5|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|bcc2c6e4ce12a3506d61fe32d0b2becc6ca563cc42ef993e577e7eebb4b3a3e3|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|448fc5f698033f86f52000131a9504d0624445e7310b87b1272c0263af691218|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|d76474bbdb73ed29ab83df4fb06eb49f59b06ec013a02b8cf2e688cf0c398aaa|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|fefa080ac20d54c3ebe51380ea20dbfb8b494e464cecc338576ef56b09d6cd9e|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|299f854fbf0a0c9640d8be9dca699495fccd83bd78254c4037d7fd87c3ffc46f|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|a7be47796a97cd16236d5b6bc032f0870b21e049aa3a8cc2ed3335d5c2d23c6e|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|4b16808893fbbd81b16a13e3569c63cc1d79a8b9d2792b5fe4b91a2680972cb9|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|b64cc5370214ce1c1c65dd92b95643ab52edb2e9e839eae2428684e145ac24fe|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|034082434c52e6a5874e643b50186dd5896b0b7f258274c49749beb30faba0f4|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|746bf34bafea5e0a92cd1428c51cf20237369590ea1747a9c9efef362e3d7951|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|ce5d2d2c291b9440e1ce2584896ef7d6305c7fbe2d345a5b2c50a8a8708c1b3f|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|63144c0ad3a58580727016befa1e7548b7be8af1e23e0d8b72488fe8ba062bb7|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|77c9c38ea3eddbe0fa16544a61bf068b259371656d7e3f278270604db80b3a43|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|4eb0d1fee06bf72e8805e42f79118c642588b03837d34f150dd0a94a7fc831c6|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|64ff94b17a528f88f0e5eb7e2f738ee599ca46eb21a5cc5bad8fafc87caf1b16|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|f60cca359d3c179879a09f63475f58d6b83c872840844d5b483401b156767bc2|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|fd4f8a51630541c769cc1796a700d53e6a7d32e41dc51923deb1efba8e9cfea7|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|b070da312568032f24aa03c79595f5b8f834b010aef6bc5b1cb614477543a879|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|0dd94dddb9fc2178a4851504a36332ab21fde3474140a6f8e010fb82c80facfb|region.orangish markup.error.sublime_linter|256"
+							],
+							"syntax": "Packages/Python/Python.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 8410.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 8,
 					"file": "/home/levitanus/.config/REAPER/Scripts/RenderMidi/build_midi.lua",
 					"semi_transient": false,
 					"settings":
@@ -1785,17 +2048,42 @@
 								"SL.luacheck.Gutter.|region.orangish markup.warning.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/x.png",
 								"SL.luacheck.Highlights.|9840e237dde8315c01ae18744de8b02fe4fdc5a6edb4e9d59aee85e09ee9192f|region.orangish markup.warning.sublime_linter|32"
 							],
+							"SL.86.region_keys":
+							[
+								"SL.luacheck.Highlights.|5fae2edc9a63cfbc3fbfea5680abed568a5532d3dfe4bd70b7be4da48bd15fdf|region.orangish markup.warning.sublime_linter|32",
+								"SL.luacheck.Gutter.|region.orangish markup.warning.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/x.png",
+								"SL.luacheck.Highlights.|bc261b50ce461a00977c370fe1984fa62a9baae00a5d6d58a02fd407ca2844ca|region.orangish markup.warning.sublime_linter|32",
+								"SL.luacheck.Highlights.|626766c08e3efa600b9781db76a1353011ecbbd4f5c22bbdae466e2ee4c1bc05|region.orangish markup.warning.sublime_linter|32",
+								"SL.luacheck.Highlights.|8f5018df65f8181db7a9efcd36d553b5dbd9917b4476cd67d90c4ee4ca70f3f0|region.orangish markup.warning.sublime_linter|32",
+								"SL.luacheck.Highlights.|9840e237dde8315c01ae18744de8b02fe4fdc5a6edb4e9d59aee85e09ee9192f|region.orangish markup.warning.sublime_linter|32",
+								"SL.luacheck.Highlights.|4d72238da98d9650eb0eeea66b80ac4f7339fc513d2d2c93cbac7d4cbcf432ad|region.orangish markup.warning.sublime_linter|32",
+								"sublime_linter.protected_regions",
+								"SL.luacheck.Highlights.|33f5277c7faf2aa233acaace163d8e507fd5f147a29c34f288fb2bfc488f4bbb|region.orangish markup.warning.sublime_linter|32",
+								"SL.luacheck.Highlights.|72ad0aa02e101f1738ebec22213c35f217f007085fad4d55cb44d5429b0f874e|region.orangish markup.warning.sublime_linter|32",
+								"SL.luacheck.Highlights.|9db38f1cd626a4d8f1faa92d442798d1ced4e0b0437cfc4381b001f1e4826f39|region.orangish markup.warning.sublime_linter|32",
+								"SL.luacheck.Highlights.|3a63742ca7102810433a9de112b15be28f657c65c9eab469d552f22509be65cb|region.orangish markup.warning.sublime_linter|32",
+								"SL.luacheck.Highlights.|54ebcf499c4860c677f10ccea8f936798da0e3baac9285e74d92f0bba6550dd6|region.orangish markup.warning.sublime_linter|32",
+								"SL.luacheck.Highlights.|0f2ca19d4fc915c18ca7f1f7365c323dfbc9a3e1442135445e73822ba71915c3|region.orangish markup.warning.sublime_linter|32",
+								"SL.luacheck.Highlights.|18d0c300dd61932ba2ce14f85754910df86eabf551a15552c7e143dfc2873cf6|region.orangish markup.warning.sublime_linter|32",
+								"SL.luacheck.Highlights.|08f229b2e288404c9d6d99e751e7768582e064adc0aaed27885ff8cc0bc94e26|region.orangish markup.warning.sublime_linter|32",
+								"SL.luacheck.Highlights.|e9e2c2317c6b61ab23693cc346c54f2c19692654680da97d64b928457904961f|region.orangish markup.warning.sublime_linter|32",
+								"SL.luacheck.Highlights.|36faf983bcdae6e71e5038e38f7e4a0c38c57cba34effd33b373c55a8590a79f|region.orangish markup.warning.sublime_linter|32",
+								"SL.luacheck.Highlights.|5788ceaefc196c0ece505d2aebd2c29bff553979b8a549af63fa73a717cb8e9e|region.orangish markup.warning.sublime_linter|32",
+								"SL.luacheck.Highlights.|080b697108145a3bfc518d1e69ce4f50c5040d5106889e030db0947db73f6894|region.orangish markup.warning.sublime_linter|32",
+								"SL.luacheck.Highlights.|0bbd5b196a6e2328774115d81444f71fca926c77dc85e8d77f41fc5b07a97156|region.orangish markup.warning.sublime_linter|32",
+								"SL.luacheck.Highlights.|420668a73e6182f5334b2bb8a13f9e9981606c2a3b60046b785cde54fd0c3715|region.orangish markup.warning.sublime_linter|32"
+							],
 							"syntax": "Packages/Lua/Lua.sublime-syntax"
 						},
 						"translation.x": 0.0,
 						"translation.y": 663.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 7,
 					"type": "text"
 				},
 				{
-					"buffer": 6,
+					"buffer": 9,
 					"file": "/home/levitanus/.config/REAPER/Scripts/RenderMidi/render_midi",
 					"semi_transient": false,
 					"settings":
@@ -1819,11 +2107,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 6,
 					"type": "text"
 				},
 				{
-					"buffer": 7,
+					"buffer": 10,
 					"file": "session_management/persistence.py",
 					"semi_transient": false,
 					"settings":
@@ -1892,13 +2180,30 @@
 								"SL.mypy.Highlights.|19baa738dc1f8f0450750af3b3224c43afd730945070bd74bdbb4ba4e0dcef59|region.orangish markup.error.sublime_linter|256",
 								"SL.flake8.Gutter.|region.yellowish markup.warning.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/triangle.png"
 							],
+							"SL.88.region_keys":
+							[
+								"SL.mypy.Highlights.|baaa243d10f4f9fbce08b58203fabb2d033edd79960d211eb97988c0051ba361|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|d588c890bd8fbef5e40e280951f20e1f81ed731ca8d77dee0ca1fcd541be0838|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|eb2cead282066e429a7e529c29ae5327aa547145bcb6022649f99d12400e682d|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|f3d95a5740efd5f974811b87e2158de8d8e31ff6d969bccca85ad0f0047000d2|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Gutter.|region.orangish markup.error.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/x.png",
+								"SL.mypy.Highlights.|5cc8ae91f1c8394a52af96db6ebcaaea3df3d21fb5c9b9bceafe250d7b0d6e86|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|761ab673ba957f7356920d8ed31800a40deab6cccf6bf6680b4a4670e4748600|region.orangish markup.error.sublime_linter|256",
+								"SL.flake8.Highlights.|e15a4e84f6b81734ade7ca6b17a97636c055dc74438647241282bbaefba104c6|region.yellowish markup.warning.sublime_linter|32",
+								"SL.mypy.Highlights.|dc5254b715529b170c8ebfb7507162523e56de399a37d381db15804eade2018e|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|712a48ed90e5ffa419b56ccef1878b3631aff50ee30b64905b8db662b0f44ad5|region.orangish markup.error.sublime_linter|256",
+								"sublime_linter.protected_regions",
+								"SL.mypy.Highlights.|e84882cf3fea376726ab96bff020f1cfb8b9fbeeffeabe6517e70dcffde23251|region.orangish markup.error.sublime_linter|256",
+								"SL.mypy.Highlights.|19baa738dc1f8f0450750af3b3224c43afd730945070bd74bdbb4ba4e0dcef59|region.orangish markup.error.sublime_linter|256",
+								"SL.flake8.Gutter.|region.yellowish markup.warning.sublime_linter|Packages/SublimeLinter/gutter-themes/Default/triangle.png"
+							],
 							"syntax": "Packages/Python/Python.sublime-syntax"
 						},
 						"translation.x": 0.0,
 						"translation.y": 170.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 6,
+					"stack_index": 9,
 					"type": "text"
 				}
 			]

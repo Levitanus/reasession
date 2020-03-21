@@ -9,6 +9,14 @@ from . import MASTER_PROJ_NAME, SLAVE_PROJECT_NAME
 # from time import sleep
 
 
+@pt.mark.skipif(
+    not rpr.dist_api_is_enabled(), reason='not connected to reaper'
+)
+def test_project():
+    pr = ss.Project('test_master')
+    assert pr.last_ip == 'localhost'
+
+
 # @pt.mark.skip
 @pt.mark.skipif(
     not rpr.dist_api_is_enabled(), reason='not connected to reaper'
@@ -18,13 +26,12 @@ def test_master_out_track():
     m_pr = ss.Project(MASTER_PROJ_NAME)
     s_pr = ss.SlaveProject(SLAVE_PROJECT_NAME, 'localhost')
     m_pr.make_current_project()
-    m_tr = rpr.Track(id='out', project=m_pr)
+    # m_tr = rpr.Track(id='out', project=m_pr)
     # print(s_pr.__module__, s_pr.__qualname__)
     with s_pr.make_current_project():
-        s_tr = rpr.Track(id='in', project=s_pr)
-    o_track = ss.MasterOutTrack(
-        track=m_tr, slave=s_pr, target=ss.SlaveInTrack(s_tr)
-    )
+        s_tr = ss.SlaveInTrack(id='in', project=s_pr)
+    o_track = ss.MasterOutTrack(id='out', project=m_pr, target=s_tr)
+    # print(type(o_track.project))
 
     o_childs = o_track.childs
     assert rpr.Track(
@@ -35,25 +42,19 @@ def test_master_out_track():
     matched = o_track.match_childs()
     m_id = rpr.Track(id='B4', project=m_pr).id
     with s_pr.make_current_project():
-        assert matched[m_id].target.track == rpr.Track(id='B4', project=s_pr)
+        assert matched[m_id].target == rpr.Track(id='B4', project=s_pr)
 
     m_id = rpr.Track(id='B3Ch4', project=m_pr).id
     with s_pr.make_current_project():
-        assert matched[m_id].target.track == rpr.Track(
-            id='B3Ch4', project=s_pr
-        )
+        assert matched[m_id].target == rpr.Track(id='B3Ch4', project=s_pr)
 
     m_id = rpr.Track(id='B4Ch1B1', project=m_pr).id
     with s_pr.make_current_project():
-        assert matched[m_id].target.track == rpr.Track(
-            id='B4Ch1', project=s_pr
-        )
+        assert matched[m_id].target == rpr.Track(id='B4Ch1', project=s_pr)
 
     m_id = rpr.Track(id='B2Ch1B1', project=m_pr).id
     with s_pr.make_current_project():
-        assert matched[m_id].target.track == rpr.Track(
-            id='B2Ch1B1', project=s_pr
-        )
+        assert matched[m_id].target == rpr.Track(id='B2Ch1B1', project=s_pr)
 
 
 @pt.mark.skipif(
@@ -65,12 +66,12 @@ def test_slave_track(mConnect):
     host = '192.168.2.1'
     pr = ss.SlaveProject(id=SLAVE_PROJECT_NAME, ip=host)
     with pr.make_current_project():
-        tr = ss.SlaveInTrack(rpr.Track('in', project=pr))
+        tr = ss.SlaveInTrack(id='in', project=pr)
     rpr.Project(MASTER_PROJ_NAME).make_current_project()
     with tr.connect():
         mConnect.assert_called_with(host)
-        assert tr.track.name == 'in'
-    assert tr.track.name == ''
+        assert tr.name == 'in'
+    assert tr.name == ''
 
 
 # @pt.mark.skipif(
@@ -99,7 +100,7 @@ class MonkeySessTrack:
         buses_packed: bool = False,
         buses_unpacked: bool = False
     ) -> None:
-        self.id_ = id
+        self.id = id
         self.buses_packed = buses_packed
         self.buses_unpacked = buses_unpacked
 
@@ -112,12 +113,12 @@ class MonkeySessTrack:
         self._target = track
 
     def __repr__(self) -> str:
-        return f'Track({self.id_}) target = Track({self.target.id_})'
+        return f'Track({self.id}) target = Track({self.target.id})'
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, MonkeySessTrack):
             return False
-        if self.id_ == other.id_:
+        if self.id == other.id:
             return True
         return False
 
@@ -165,7 +166,7 @@ def test_childs_tree():
         'B5ChallB2Ch1': ss.Track('B5ChallB2Ch1'),
         'B5ChallB2Ch2': ss.Track('B5ChallB2Ch2'),
     }
-    assert tracks_out['B1Chall'].id_ == "B1Chall"
+    assert tracks_out['B1Chall'].id == "B1Chall"
     tree_out = {
         ss.ChildAddress(1, 0):
             ss.Child(track=tracks_out['B1Chall']),
@@ -255,16 +256,16 @@ def test_childs_tree():
 @pt.mark.skipif(
     not rpr.dist_api_is_enabled(), reason='not connected to reaper'
 )
+@rpr.inside_reaper()
 def test_get_childs_tree():
     # test straight
-    track = ss.Track(
-        rpr.Track(id='B4Ch1', project=rpr.Project(MASTER_PROJ_NAME))
-    )
+    track = ss.Track(id='B4Ch1', project=ss.Project(MASTER_PROJ_NAME))
+
     tree = track.get_childs_tree()
     assert tree[(1, 0)].track.name == 'B4Ch1B1'
     assert tree[(3, 0)].track.name == 'B4Ch1B3'
     # test recursive
-    track = ss.Track(rpr.Track(id='B4', project=rpr.Project(MASTER_PROJ_NAME)))
+    track = ss.Track(id='B4', project=ss.Project(MASTER_PROJ_NAME))
     tree = track.get_childs_tree()
     assert tree[(0, 1)].track.name == 'B4Ch1'
     assert tree[(0, 1)].childs[(1, 0)].track.name == 'B4Ch1B1'
@@ -276,8 +277,8 @@ def test_get_childs_tree():
 def test_bus_packed():
 
     def track(id: str) -> ss.Track:
-        r_tr = rpr.Track(id=id, project=rpr.Project(MASTER_PROJ_NAME))
-        return ss.Track(r_tr)
+        return ss.Track(id=id, project=rpr.Project(MASTER_PROJ_NAME))
+        # return ss.Track(r_tr)
 
     tr = track('B2Ch1')
     assert tr.buses_packed is True
