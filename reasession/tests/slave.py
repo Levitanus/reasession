@@ -1,4 +1,4 @@
-from session_management.connections import jack_backend as jb
+from reasession.connections import jack_backend as jb
 
 back = jb.JackBackend(
     '192.168.2.2',

@@ -7,9 +7,9 @@ from threading import current_thread
 from threading import Thread
 from threading import main_thread
 from threading import enumerate as tr_enum
-from session_management.common import log
-from session_management.common import TimeCallback
-from session_management.config import ANNOUNCE_STRING
+from reasession.common import log
+from reasession.common import TimeCallback
+from reasession.config import ANNOUNCE_STRING
 
 DEF_HOST: str = '127.0.0.1'
 DEF_PORT: int = 49541

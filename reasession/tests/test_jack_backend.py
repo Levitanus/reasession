@@ -545,11 +545,11 @@ def test_match_host_ports(monkeypatch):
     assert bck.match_host_ports(t_host) == t_output
 
 
-@mock.patch('reapy.Project')
-@mock.patch('reapy.Track')
-@mock.patch('reapy.connect')
-@mock.patch('session_management.connections.jack_backend.set_track_midi_in')
-@mock.patch('session_management.connections.jack_backend.set_track_midi_out')
+@mock.patch.object(rpr, 'Project')
+@mock.patch.object(rpr, 'Track')
+@mock.patch.object(rpr, 'connect')
+@mock.patch.object(bck, 'set_track_midi_in')
+@mock.patch.object(bck, 'set_track_midi_out')
 def test_connect(
     set_track_midi_out, set_track_midi_in, monkey_connect, MonkeyTrack,
     MonkeyProject

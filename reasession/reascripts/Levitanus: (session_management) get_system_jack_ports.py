@@ -1,6 +1,6 @@
 # import typing as ty
-from session_management import persistence as prs
-from session_management.connections.jack_backend import get_jack_ports
+from reasession import persistence as prs
+from reasession.connections.jack_backend import get_jack_ports
 
 if __name__ == '__main__':
     ports = get_jack_ports()

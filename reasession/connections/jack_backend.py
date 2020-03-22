@@ -23,7 +23,7 @@ import typing_extensions as te
 import jack
 import reapy as rpr
 from reapy import reascript_api as RPR
-from session_management import persistence as prs
+from reasession import persistence as prs
 from . import interface as iface
 
 CONN_NAME_REGEXP = re.compile(r'(.+):(.+)')
