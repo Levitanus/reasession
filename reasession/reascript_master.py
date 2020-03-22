@@ -13,7 +13,7 @@ from common import is_stopped
 from slaves import Slaves
 
 log.enable_print()
-# log.enable_console()
+log.enable_console()
 
 slaves = Slaves(DEF_PORT)
 
@@ -27,10 +27,7 @@ def main_loop() -> None:
     if is_stopped():
         slaves.run()
         gui_server.run()
-    if rpr.is_inside_reaper():
-        rpr.defer(main_loop)
-    else:
-        main_loop()
+    rpr.defer(main_loop)
 
 
 def at_exit() -> None:

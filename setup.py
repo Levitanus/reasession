@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 setup(
-    name="session_management",
+    name="reasession",
     version="0.1",
     packages=find_packages(),
-    package_data={'': ['*.kv']},
-    install_requires=['kivy', 'typing_extensions', 'python-reapy'],
+    package_data={'': ['*.kv', 'py.typed']},
+    install_requires=['typing_extensions', 'python-reapy'],
 )

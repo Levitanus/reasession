@@ -1,0 +1,66 @@
+desc:render_midi
+
+slider1:0<0,1,1>Save
+options:gmem=RenderMidiNameSpace;
+
+@init
+// make offsets for local memory (maximum midi buffer of 1000000 events)
+qnOffset = 1;
+msg1Offset = 1000000;
+msg2Offset = 2000000;
+msg3Offset = 3000000;
+memPtr = 0;
+// local events counter
+memCounter = 0;
+// debug visualisation
+msg1Print = 0;
+msg2Print = 0;
+msg3Print = 0;
+count_gets = 0;
+
+// store event into local memory
+function store_msg(msg1, msg2, msg3)(
+    qnOffset[memCounter] = beat_position;
+    msg1Offset[memCounter] = msg1;
+    msg2Offset[memCounter] = msg2;
+    msg3Offset[memCounter] = msg3;
+
+    qnPrint = qnOffset[memCounter];
+    msg1Print = msg1Offset[memCounter];
+    msg2Print = msg2Offset[memCounter];
+    msg3Print = msg3Offset[memCounter];
+
+    memCounter += 1;
+    memPtr[0] = memCounter;
+);
+
+@sample
+while (midirecv(offset, msg1, msg2, msg3))(
+    play_state == 1 ? store_msg(msg1, msg2, msg3);
+    midisend(offset, msg1, msg2, msg3);
+);
+
+@slider
+slider1 == 1?(
+    // move events buffer to gmem
+    count_gets += 1;
+    i = 0;
+    gmem[0] = memPtr[0];
+    while (i <= memPtr[0])(
+        gmem[qnOffset + i] = qnOffset[i];
+        gmem[msg1Offset + i] = msg1Offset[i];
+        gmem[msg2Offset + i] = msg2Offset[i];
+        gmem[msg3Offset + i] = msg3Offset[i];
+        i+=1;
+    );
+    memCounter = 0;
+    slider1 = 0;
+);
+
+@serialize
+// for saving data after render
+file_mem(0, memPtr,  1);
+file_mem(0, qnOffset,  memCounter);
+file_mem(0, msg1Offset,  memCounter);
+file_mem(0, msg2Offset,  memCounter);
+file_mem(0, msg3Offset,  memCounter);

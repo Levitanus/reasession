@@ -19,15 +19,21 @@ import netifaces as nip
 import reapy as rpr
 from common import log
 from config import EXT_SECTION, ADDRESS_KEY_SLAVE
+log.enable_print()
 
 
 def cnoose_ip() -> ty.Optional[str]:
     """Ask user to choose IP for slave server."""
-    hard = ty.cast(ty.List[str], nip.interfaces())
+    hard = ty.cast(ty.List[str], nip.interfaces())  # type:ignore
     log(hard)
-    addresses = [
-        nip.ifaddresses(iface)[nip.AF_INET][0]['addr'] for iface in hard
-    ]
+    log([nip.ifaddresses(iface) for iface in hard])  # type:ignore
+    addresses = ty.cast(
+        ty.List[str],
+        [
+            nip.ifaddresses(iface)[nip.AF_INET][0]['addr']  # type:ignore
+            for iface in hard
+        ]
+    )
     log(*addresses)
     rpr.delete_ext_state(EXT_SECTION, ADDRESS_KEY_SLAVE, persist=True)
     for addr in addresses:

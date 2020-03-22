@@ -30,12 +30,10 @@ class Slaves:
         )
 
     def _on_discovery(self, host: str) -> None:
-        # pass
-        # log('on discovery')
         if host not in self._slaves_active:
             log(f'slave on {host} registered')
             self._slaves_active[host] = SlaveForMaster(host, self._slaves_port)
-            rpr.defer(self._send_slaves_to_gui)
+            # rpr.defer(self._send_slaves_to_gui)
 
     def _ping(self) -> None:
         # log('ping')
@@ -49,6 +47,7 @@ class Slaves:
             except ConnectionRefusedError as e:
                 log(f'slave {host} is dead: {e}')
                 del self._slaves_active[host]
+                rpr.defer(self._send_slaves_to_gui)
                 return
             except st.timeout as e:
                 log(f'timeout on host: {host}')
@@ -70,3 +69,6 @@ class Slaves:
 
     def active_slaves(self) -> ty.Dict[str, SlaveForMaster]:
         return self._slaves_active
+
+    def active_slaves_list(self) -> ty.List[str]:
+        return [key for key in self._slaves_active]

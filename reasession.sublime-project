@@ -1,0 +1,49 @@
+{
+	"build_systems":
+	[
+		{
+			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+			"name": "Anaconda Python Builder",
+			"selector": "source.python",
+			"shell_cmd": "\"/usr/bin/python3\" -u \"$file\""
+		}
+	],
+	"folders":
+	[
+		{
+			"path": "."
+		}
+	],
+    "settings":
+        {
+            // "src_root": "./session_management",
+            "SublimeLinter.linters.mypy.disable": false,
+            "SublimeLinter.linters.pydocstyle.disable": false,
+            "SublimeLinter.linters.pydocstyle.disable": true,
+            "SublimeLinter.linters.pylint.disable": true,
+            "SublimeLinter.linters.pycodestyle.disable": false,
+            "SublimeLinter.linters.flake8.disable": false,
+
+            "SublimeLinter.linters.mypy.working_dir": 
+                "$(folder)/reasession",
+            // "SublimeLinter.linters.mypy.args": [
+            //     "--strict",
+            //     "--disallow-any-expr",
+            //     "--disallow-subclassing-any",
+            //     "--disallow-untyped-calls",
+            //     "--disallow-untyped-defs",
+            //     "--disallow-incomplete-defs",
+            //     "--disallow-untyped-decorators",
+            //     "--warn-redundant-casts",
+            //     "--warn-unused-ignores",
+            //     "--warn-return-any",
+            //     "--warn-unreachable",
+            //     "--show-error-context",
+            //     "--show-column-numbers",
+            // ],
+            "PyTest": {
+                "working_dir": "${folder}/reasession",
+                "options": "--tb=auto -l --cov=reasession --cov-report html --cov-report xml --cov-report term",
+            }
+        }
+}
