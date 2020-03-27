@@ -1,5 +1,8 @@
-from typing import NewType
+import typing as ty
 from enum import IntEnum
+T1 = ty.TypeVar('T1')
+FuncType = ty.Callable[..., ty.Any]  # type:ignore
+FT = ty.TypeVar('FT', bound=FuncType)
 
 
 class SessionError(Exception):
@@ -23,5 +26,17 @@ class FreezeState(IntEnum):
     freezed = 3
 
 
-MidiBus = NewType('MidiBus', int)
-HostIP = NewType('HostIP', str)
+MidiBus = ty.NewType('MidiBus', int)
+HostIP = ty.NewType('HostIP', str)
+
+
+class CashedProperty:
+
+    def __init__(self, prop_name: str) -> None:
+        self.prop_name = prop_name
+
+    def __get__(self, obj: T1, cls: ty.Type[T1]) -> ty.Callable[[FT], FT]:
+        return self.__call__
+
+    def __call__(self, func: FT) -> FT:
+        ...

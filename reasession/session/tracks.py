@@ -13,6 +13,7 @@ from builtins import BaseException
 from types import TracebackType
 import typing_extensions as te
 import reapy as rpr
+from reapy import reascript_api as RPR
 
 from . import SessionError, HostIP
 from .projects import Project, SlaveProject
@@ -446,6 +447,17 @@ class Track(rpr.Track):
         ContextManager[Track]
         """
         return TrackConnect(self)
+
+    def set_info_value(self, key: str, value: float) -> None:
+        RPR.SetMediaTrackInfo_Value(self.id, key, value)  # type:ignore
+
+    @property
+    def recarm(self) -> bool:
+        return bool(self.get_info_value('I_RECARM'))
+
+    @recarm.setter
+    def recarm(self, state: bool) -> None:
+        self.set_info_value('I_RECARM', int(state))
 
 
 class TrackConnect(ty.ContextManager[Track]):

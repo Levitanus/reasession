@@ -41,6 +41,7 @@ def test_master_out_track():
     m_id = rpr.Track(id='B4', project=m_pr).id
     assert matched[m_id].target.s_project.last_ip == 'localhost'
     with s_pr.make_current_project():
+        print(matched[m_id].target.name)
         assert matched[m_id].target == rpr.Track(id='B4', project=s_pr)
 
     m_id = rpr.Track(id='B3Ch4', project=m_pr).id
@@ -60,25 +61,25 @@ def test_master_out_track():
     slave_names = ('B1', 'B3Ch4', 'B4Ch1')
     with m_pr.make_current_project():
         for name in master_names:
-            tr = rpr.Track(id=name, project=m_pr)
+            tr = ss.Track(id=name, project=m_pr)
             tr.recarm = True
     o_track.sync_recarm()
     with s_pr.make_current_project():
-        tr = rpr.Track(id='B4', project=s_pr)
+        tr = ss.Track(id='B4', project=s_pr)
         assert tr.recarm == False
         for name in slave_names:
-            tr = rpr.Track(id=name, project=s_pr)
+            tr = ss.Track(id=name, project=s_pr)
             assert tr.recarm == True
     with m_pr.make_current_project():
         for name in master_names:
-            tr = rpr.Track(id=name, project=m_pr)
+            tr = ss.Track(id=name, project=m_pr)
             tr.recarm = False
     o_track.sync_recarm()
     with s_pr.make_current_project():
-        tr = rpr.Track(id='B4', project=s_pr)
+        tr = ss.Track(id='B4', project=s_pr)
         assert tr.recarm == False
         for name in slave_names:
-            tr = rpr.Track(id=name, project=s_pr)
+            tr = ss.Track(id=name, project=s_pr)
             assert tr.recarm == False
 
 
@@ -188,7 +189,7 @@ def test_childs_tree():
                     ss.ChildAddress(1, 2):
                         ss.Child(tracks_out['B3ChallB1Ch2'])
                 }
-            ),
+        ),
         ss.ChildAddress(4, 0):
             ss.Child(
                 track=tracks_out['B4Chall'],
@@ -198,7 +199,7 @@ def test_childs_tree():
                     ss.ChildAddress(2, 2):
                         ss.Child(tracks_out['B4ChallB2Ch2'])
                 }
-            ),
+        ),
         ss.ChildAddress(5, 0):
             ss.Child(
                 track=tracks_out['B5Chall'],
@@ -212,15 +213,15 @@ def test_childs_tree():
                                 ss.ChildAddress(1, 0):
                                     ss.Child(
                                         tracks_out['B5ChallB2Ch1B1Chall']
-                                    ),
+                                ),
                                 ss.ChildAddress(2, 0):
                                     ss.Child(
                                         tracks_out['B5ChallB2Ch1B2Chall']
-                                    ),
+                                ),
                             }
-                        ),
+                    ),
                 }
-            ),
+        ),
     }
     tree_in = {
         ss.ChildAddress(1, 0):
@@ -234,7 +235,7 @@ def test_childs_tree():
                     ss.ChildAddress(1, 1): ss.Child(tracks_in['B3ChallB1Ch1']),
                     ss.ChildAddress(1, 2): ss.Child(tracks_in['B3ChallB1Ch2'])
                 }
-            ),
+        ),
         ss.ChildAddress(4, 0):
             ss.Child(track=tracks_in['B4Chall']),
         ss.ChildAddress(5, 0):
@@ -244,7 +245,7 @@ def test_childs_tree():
                     ss.ChildAddress(2, 1): ss.Child(tracks_in['B5ChallB2Ch1']),
                     ss.ChildAddress(2, 2): ss.Child(tracks_in['B5ChallB2Ch2'])
                 }
-            ),
+        ),
     }
     init_target = ss.Track('slave_in')
     # tracks matched primary\secondary
