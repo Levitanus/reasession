@@ -1,53 +1,112 @@
 import reapy as rpr
 from reapy import reascript_api as RPR
+import typing as ty
+import typing_extensions as te
+from enum import IntFlag
+import struct
 
-s_pos, e_pos = 1, 12.0
 
-pr = rpr.Project()
-tr = pr.selected_tracks[0]
-item = tr.add_midi_item(start=s_pos, end=e_pos, quantize=True)
-rpr.print(item)
-take = item.active_take
-rpr.print(take)
-body = [
-    # 0xf0,
-    # 0xFF,
-    # 0x52,
-    # 0x50,
-    # 0x62,
+class CCShape(IntFlag):
+    no_shape = 0
+    linear = 16
+    slow_start_end = 32
+    fast_start = 16 | 32
+    fast_end = 64
+    beizer = 16 | 64
 
-    # 0x02,
 
-    0x90,
-    64,
-    85,
-    # 2,
-    # 0xf7
-]
-# take.add_sysex(s_pos+2, body)
-rpr.print(0xf7)
-rpr.print(body)
-# body_b = bytes(body)
-body_b = '\\'.join([hex(i) for i in body])
-rpr.print(body_b)
-# body_b = bytes.fromhex(body_b)
-# rpr.print(body_b)
-body_b = ''.join([chr(i) for i in body])
-rpr.print(body_b.encode('latin1'))
-size = len(body_b)
-rpr.print(size)
-ppqpos = take._resolve_midi_unit((2,), unit='beats')[0]
-result = RPR.MIDI_InsertTextSysexEvt(take.id, False, False,
-                                     ppqpos, -1, body_b.encode()[1:], size)
-# result = RPR.MIDI_InsertEvt(take.id, False, False, ppqpos, body_b, size)
-rpr.print(result)
-rpr.print(0xC2)
-RPR.MIDI_Sort(take.id)
+Message = te.TypedDict(
+    'Message', {
+        'ppq': int,
+        'selected': bool,
+        'muted': bool,
+        'cc_shape': CCShape,
+        'buf': ty.List[int],
+    }
+)
 
-# item = tr.items[0]
-# take = item.active_take
-# print(take)
+# for i in [1, 2, 16, 32, 16 | 32, 64, 16 | 64, 1 | 16, 1 | 32]:
+#     print(CCShape(i & 0b11110000))
 
-# retval, _, _, _, _, _, msg, msg_sz = RPR.MIDI_GetEvt(
-#     take.id, 0, 1, 1, 1, 'looongmessage', 65000)
-# rpr.print(retval, msg, msg_sz)
+# exit()
+
+take = rpr.Project().selected_items[0].active_take
+retval, take, bufNeedBig, bufNeedBig_sz = RPR.MIDI_GetAllEvts(
+    take.id, '', 1024
+)
+
+# print(bufNeedBig_sz, bufNeedBig.encode('latin-1'), sep=': ')
+
+
+def unpack_events(msg_str: str) -> ty.List[Message]:
+    msg = msg_str.encode('latin-1')
+    out: ty.List[Message] = []
+    i = 0
+    ppq = 0
+    while i < len(msg):
+        ofst, flag, len_ = (
+            struct.unpack('<I', msg[i:i + 4])[0], int(msg[i + 4]),
+            struct.unpack('<I', msg[i + 5:i + 9])[0]
+        )
+        ppq += ofst
+        buf_b = msg[i + 9:i + 9 + len_]
+        buf = [int(b) for b in buf_b]
+        i += 9 + len_
+        if len_ == 0:
+            break
+        out.append(
+            Message(
+                ppq=ppq,
+                selected=bool(flag & 1),
+                muted=bool(flag & 2),
+                cc_shape=CCShape(flag & 0b11110000),
+                buf=buf
+            )
+        )
+    return out
+
+
+def pack_events(events: ty.List[Message], take: rpr.Take) -> str:
+    out = b''
+    last_ppq = 0
+    for msg in events:
+        evt = b''
+        ofst_i = msg['ppq'] - last_ppq
+        print(ofst_i)
+        if ofst_i > 4294967295:
+            raise NotImplementedError(
+                'ofset larger than 4294967295 currently not supported'
+            )
+            # something done with big offset
+            # it is about many-many-many hours between events
+            # (1 hour is about 8000000 ppq in 120 bpm)
+        ofst = struct.pack('<I', ofst_i)
+        evt += ofst
+        last_ppq = msg['ppq']
+
+        flag = bytes(
+            [
+                int(msg['selected']) | (int(msg['muted']) << 1)
+                | msg['cc_shape']
+            ]
+        )
+        evt += flag
+
+        len_ = struct.pack('<I', len(msg['buf']))
+        evt += len_
+
+        buf = bytes(msg['buf'])
+        evt += buf
+        out += evt
+    return out.decode('latin-1')
+
+
+unpacked = unpack_events(bufNeedBig)
+# print(*unpacked, sep='\n-------\n')
+
+packed = pack_events(unpacked, rpr.Project().selected_items[1].active_take)
+# print(packed)
+take2 = rpr.Project().selected_items[1].active_take
+RPR.MIDI_SetAllEvts(take2.id, packed, len(packed))
+take2.sort_events()
+print(int.from_bytes(b'\xff\xff\xff\xff', 'little') - 7846247)
