@@ -1,4 +1,4 @@
-from .misc import SessionError, HostIP, FreezeState, MidiBus
+from .misc import SessionError, SlaveUnacessible, HostIP, FreezeState, MidiBus
 from .projects import Project, SlaveProject, Host
 from .tracks import (
     Child, Childs, ChildAddress, Track, TrackChildsSet, SlaveInTrack,
@@ -17,6 +17,7 @@ __all__ = [
     'MasterOutTrack',
     'Host',
     'SessionError',
+    'SlaveUnacessible',
     'FreezeState',
     'MidiBus',
     'HostIP',

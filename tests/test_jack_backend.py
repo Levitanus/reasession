@@ -4,8 +4,8 @@ import pytest as pt
 import mock
 import jack
 import reapy as rpr
-from ..connections import jack_backend as bck
-from ..connections import interface as iface
+from reasession.connections import jack_backend as bck
+from reasession.connections import interface as iface
 
 
 class MonkeyTrack():

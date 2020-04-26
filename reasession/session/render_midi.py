@@ -2,8 +2,6 @@ import reapy as rpr
 import typing as ty
 import typing_extensions as te
 import json
-from enum import IntEnum
-from pathlib import Path
 import os
 
 from reasession.config import EXT_SECTION
@@ -12,7 +10,7 @@ MidiBuf = te.TypedDict(
     'MidiBuf', {
         'qn': float,
         'bus': int,
-        'buf': ty.List[int]
+        'buf': ty.List[int],
     }
 )
 MidiNote = te.TypedDict(
@@ -32,44 +30,17 @@ RenderSettings = te.TypedDict(
 )
 
 
-class Msg(IntEnum):
-    msg1 = 1
-    msg2 = 2
-    msg3 = 3
-    ch = 4
-    type_ = 5
-
-
-def mmsg_parce(msg: ty.List[int], need: Msg) -> int:
-    if need == Msg.ch:
-        return msg[0] % 0x10
-    if need == Msg.type_:
-        return msg[0] >> 4
-    if need in (Msg.msg1, Msg.msg2, Msg.msg3):
-        return msg[need.value - 1]
-    raise TypeError(f'Bad need arg ({need})')
-
-
-def lua_kv_formatter(k: ty.Union[int, str], v: ty.Union[float, str]) -> str:
-    if isinstance(k, int):
-        k += 1
-    k, v = map(
-        lambda i: f'{i}' if isinstance(i, (float, int)) else f'"{i}"', (k, v)
-    )
-    return f'[{k}]={v}'
-
-
-def lua_table_formatter(gen: ty.Iterator[str]) -> str:
-    return f'{{{",".join(gen)}}}'
-
-
 class MidiRenderer:
+    """Renders midi and can past it to different tracks (and hosts).
+
+    Note
+    ----
+    Renders midi on track as it comes to the end of FxChain
+    """
+
     key_fx_idx = 'render_midi_fx_idx'
     key_track_idx = 'render_midi_track_idx'
     key_proj_idx = 'render_midi_proj_idx'
-
-    key_take_guid = 'build_midi_on_track_take'
-    key_events = 'build_midi_on_track_evts'
 
     key_result = 'render_midi_output'
 
@@ -79,11 +50,6 @@ class MidiRenderer:
         with rpr.inside_reaper():
             self.get_command_id: int = rpr.get_command_id(  # type:ignore
                 "_RSf3f54c28105cef27e0d62a326647e71bd48d882a"
-            )
-            assert isinstance(self.get_command_id, int),\
-                'cannot load render_midi.lua'
-            self.build_command_id: int = rpr.get_command_id(  # type:ignore
-                "_RS5363a1728d2e87be1a7d472621c512ebf404b8da"
             )
             assert isinstance(self.get_command_id, int),\
                 'cannot load render_midi.lua'
@@ -99,7 +65,7 @@ class MidiRenderer:
                 MidiBuf(
                     qn=item['qn'],
                     bus=int(item['bus']),
-                    buf=[int(i) for i in item['buf']]
+                    buf=[int(i) for i in item['buf']],
                 )
             )
         return midi_buf
@@ -120,11 +86,15 @@ class MidiRenderer:
         fx = track.fxs[self.fx_name]
         rpr.set_ext_state(EXT_SECTION, self.key_fx_idx, str(fx.index))
 
-        rpr.perform_action(self.get_command_id)
+        self._get_from_lua()
         raw_midi = rpr.get_ext_state(EXT_SECTION, self.key_result)
         if raw_midi == '':
             raise RuntimeError('no midi_data got from the track')
         return self._deserialize_buffer(raw_midi)
+
+    def _get_from_lua(self) -> None:
+        """For profiling needs."""
+        rpr.perform_action(self.get_command_id)
 
     def _get_project_idx(
         self, pr: rpr.Project, project_idx: ty.Optional[int] = None
@@ -140,7 +110,6 @@ class MidiRenderer:
         self,
         track: rpr.Track,
         midi_buf: ty.List[MidiBuf],
-        project_idx: ty.Optional[int] = None,
         erase_items: bool = True
     ) -> None:
         prefix = [0xFF, 0x52, 0x50, 0x62]
@@ -153,71 +122,33 @@ class MidiRenderer:
         )
 
         take = item.active_take
-        pr = track.project
-        qn_offset = pr.time_to_beats(item.position)
-        
-        for idx, msg in enumerate(midi_buf):
-            if msg['bus'] != 0:
-                take.add_event(
-                    [
-                        0xf0, *prefix,
-                        int(msg['bus']), *list(int(bt)
-                                               for bt in msg['buf']), 0xf7
-                    ],
-                    msg['qn'] - qn_offset,
-                    unit='beats'
-                )
-                continue
-            if int(msg['buf'][0]) >> 4 == 0x9:
-                note = self._get_note(midi_buf, idx)
-                take.add_note(
-                    note['start'] - qn_offset,
-                    note['end'] - qn_offset,
-                    note['note'],
-                    velocity=note['velocity'],
-                    channel=note['channel'],
-                    unit='beats',
-                    sort=False
-                )
-                continue
-            if int(msg['buf'][0]) >> 4 == 0x8:
-                continue
-            take.add_event(
-                list(int(bt) for bt in msg['buf']),
-                msg['qn'] - qn_offset,
-                unit='beats'
-            )
-
-    def _get_note(self, midi_buf: ty.List[MidiBuf], idx: int) -> MidiNote:
-        start = midi_buf[idx]['qn']
-        channel = midi_buf[idx]['buf'][0] % 0x10
-        note = midi_buf[idx]['buf'][1]
-        velocity = midi_buf[idx]['buf'][2]
-        for i in range(idx, len(midi_buf)):
-            mtype = mmsg_parce(midi_buf[i]['buf'], Msg.type_)
-            mch = mmsg_parce(midi_buf[i]['buf'], Msg.ch)
-            if not mtype == 0x8 and not mtype == 0x9:
-                continue
-            if not mch == channel:
-                continue
-            if not midi_buf[i]['buf'][1] == note:
-                continue
-            if mtype == 0x9 and midi_buf[i]['buf'][2] != 0:
-                continue
-            end = midi_buf[i]['qn']
-            break
-        midi_note = MidiNote(
-            start=start,
-            end=end,
-            note=note,
-            channel=channel,
-            velocity=velocity
+        ppqs = take.map(
+            'beat_to_ppq', iterables={'beat': [it['qn'] for it in midi_buf]}
         )
-        return midi_note
+        end_buf: ty.List[rpr.MIDIEventDict] = []
+
+        for idx, ziped in enumerate(zip(midi_buf, ppqs)):
+            msg, ppq = ziped
+            if msg['bus'] != 0:
+                buf = [
+                    0xf0, *prefix,
+                    int(msg['bus']), *list(int(bt) for bt in msg['buf']), 0xf7
+                ]
+            else:
+                buf = msg['buf']
+            end_evt: rpr.MIDIEventDict = {
+                'ppq': ppq,
+                'selected': False,
+                'muted': False,
+                'cc_shape': rpr.CCShapeFlag.square,
+                'buf': buf
+            }
+            end_buf.append(end_evt)
+        take.set_midi(end_buf)
 
     def render_tracks(self, tracks: ty.List[rpr.Track]
                       ) -> ty.Dict[str, ty.List[MidiBuf]]:
-        render_action = 42230
+
         pattern = 'temp_for_render_midi'
         resource_path = rpr.get_resource_path()
         project = tracks[0].project
@@ -244,7 +175,7 @@ class MidiRenderer:
         }
         project.selected_tracks = tracks
         self._set_render_settings(new_settings, project)
-        rpr.perform_action(render_action)
+        self._render_it()
         self._set_render_settings(original_settings, project)
         self._remove_rendered_audio(resource_path, pattern, tracks)
         project.selected_tracks = selected_tracks
@@ -253,13 +184,17 @@ class MidiRenderer:
             midi[track.id] = self.get_midi_from_track(track)
         return midi
 
+    def _render_it(self) -> None:
+        render_action = 42230
+        rpr.perform_action(render_action)
+
     def _remove_rendered_audio(
         self, resource_path: str, pattern: str, tracks: ty.List[rpr.Track]
     ) -> None:
         for idx, track in enumerate(tracks):
             idx_str = '' if len(tracks) == 1 else f'-{idx+1:03d}'
             filename = f'{os.path.join(resource_path, pattern)}{idx_str}.ogg'
-            status = os.remove(filename)
+            os.remove(filename)
 
     def _set_render_settings(
         self, new_settings: RenderSettings, project: rpr.Project

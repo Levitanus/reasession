@@ -252,6 +252,8 @@ class Track(rpr.Track):
 
     ID = ty.NewType('ID', str)
     id: ID
+    GUID_T = ty.NewType('GUID_T', str)
+    GUID: GUID_T
     target: ty.Optional[Track]
     project: Project
     _BUS_FX_NAME: te.Literal[
@@ -284,6 +286,18 @@ class Track(rpr.Track):
         self._childs = {}
         self._childs_matched_primary = {}
         self._childs_matched_secondary = {}
+
+    def __setstate__(self, state: ty.Dict[str, object]) -> None:
+        guid = ty.cast(str, state['_guid'])
+        tr = rpr.Track.from_GUID(guid, 'all')
+        state['id'] = tr.id
+        for k, v in state.items():
+            self.__dict__[k] = v
+
+    def __getstate__(self) -> ty.Dict[str, object]:
+        state = self.__dict__.copy()
+        state['_guid'] = self.GUID
+        return state
 
     @property
     def s_project(self) -> Project:
@@ -391,8 +405,8 @@ class Track(rpr.Track):
         ch_d = self._childs
         if ch_d:
             return ch_d
-        with self.make_current_project():
-            ch_tree = self.get_childs_tree()
+        # with self.make_current_project():
+        ch_tree = self.get_childs_tree()
         return Child.unpack(ch_tree)
 
     def match_childs(self, childs_set: TrackChildsSet = TrackChildsSet.both
@@ -413,7 +427,8 @@ class Track(rpr.Track):
         if not self.target:
             raise SessionError(f'track {self} has no target')
         s_ch_tree = self.get_childs_tree()
-        with self.target.make_current_project():
+        # with self.target.make_current_project():
+        with rpr.connect(self.target.project.last_ip):
             t_ch_tree = self.target.get_childs_tree()
         self._childs_matched_primary, self._childs_matched_secondary = \
             Child.match(
@@ -559,11 +574,11 @@ class MasterOutTrack(Track):
                     targets[target.id]['recarm'] = True
         with rpr.connect(t_host):
             with rpr.inside_reaper():
-                with self.target.make_current_project():
-                    for t_dict in targets.values():
-                        target = t_dict['target']
-                        recarm = t_dict['recarm']
-                        target.recarm = recarm
+                # with self.target.make_current_project():
+                for t_dict in targets.values():
+                    target = t_dict['target']
+                    recarm = t_dict['recarm']
+                    target.recarm = recarm
 
     def update(self) -> None:
         """Update state of the Track.

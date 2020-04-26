@@ -23,14 +23,38 @@ class ExtState:
         self._pr.set_ext_state(EXT_SECTION, key, value, pickled=True)
 
 
-SlavesDict = ty.Dict[trs.Track.ID, SlaveProject]
+SlavesDict = ty.Dict[trs.Track.GUID_T, SlaveProject]
 
 
-class SessionLoader:
+class Session:
 
-    def __init__(self, master: Project) -> None:
+    def __init__(
+        self,
+        master: Project,
+        connector_class: ty.Type[cif.Connector] = jbck.Connector
+    ) -> None:
         self._master = master
+        self._hosts: ty.Set[Host] = set([Host(ip=HostIP('localhost'))])
+        self._connector_cl = connector_class
         self._ext_state = ExtState(master)
+
+    @property
+    def master(self) -> Project:
+        return self._master
+
+    def host_add(self, host: Host) -> None:
+        with rpr.connect(host.ip):
+            self._hosts.add(host)
+
+    def hosts_check(self) -> None:
+        availble = set()
+        for host in self._hosts:
+            try:
+                with rpr.connect(host.ip):
+                    availble.add(host)
+            except rpr.errors.DisabledDistAPIError:
+                continue
+        self._hosts &= availble
 
     @property
     def ext_state(self) -> ExtState:
@@ -60,29 +84,3 @@ class SessionLoader:
             out_track = list(slave.keys())[0]
         slaves = self.slaves
         del slaves[ty.cast(trs.Track.ID, out_track)]
-
-
-class Session:
-
-    def __init__(
-        self,
-        master: Project,
-        connector_class: ty.Type[cif.Connector] = jbck.Connector
-    ) -> None:
-        self._master = master
-        self._hosts: ty.Set[Host] = set([Host(ip=HostIP('localhost'))])
-        self._connector_cl = connector_class
-
-    def host_add(self, host: Host) -> None:
-        with rpr.connect(host.ip):
-            self._hosts.add(host)
-
-    def hosts_check(self) -> None:
-        availble = set()
-        for host in self._hosts:
-            try:
-                with rpr.connect(host.ip):
-                    continue
-            except rpr.errors.DisabledDistAPIError:
-                availble.add(host)
-        self._hosts &= availble

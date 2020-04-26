@@ -1,4 +1,4 @@
-from .. import persistence as prs
+from reasession import persistence as prs
 
 import reapy as rpr
 from reapy import reascript_api as RPR

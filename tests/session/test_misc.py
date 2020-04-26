@@ -1,4 +1,4 @@
-from ..session import misc
+from reasession.session import misc
 import reapy as rpr
 import pytest as pt
 import typing as ty

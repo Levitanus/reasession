@@ -4,11 +4,13 @@ from builtins import BaseException
 import typing as ty
 import typing_extensions as te
 import reapy as rpr
+from uuid import uuid4
 from contextlib import contextmanager
 
 import reasession as rs
+from reasession import session as ss
 
-from . import SessionError, HostIP, FreezeState
+from . import SessionError, SlaveUnacessible, HostIP, FreezeState
 from ..config import EXT_SECTION, MASTER_KEY
 
 FuncType = ty.Callable[..., ty.Any]  # type:ignore
@@ -77,17 +79,62 @@ class Host:
 class Project(rpr.Project):
     _host_ip: HostIP
     _host: ty.Optional[Host]
-    _slave_projects: ty.Dict[rs.session.Track.ID, SlaveProject]
-    _out_tracks: ty.Dict[rs.session.Track.ID, rs.session.Track]
+    GUID_T = ty.NewType('GUID_T', str)
+    _guid: ty.Optional[GUID_T]
+    ID = ty.NewType('ID', str)
+    id: ID
 
     def __init__(
         self, id: ty.Union[str, int], ip: HostIP = HostIP('localhost')
     ) -> None:
         self._host_ip = ip
         self._host = None
-        self._slave_projects = {}
-        self._out_tracks = {}
+        self._guid = None
         super().__init__(id)
+
+    @property
+    def GUID(self) -> Project.GUID_T:
+        """Syntax sugar to keep Project unique.
+
+        :type: Project.GUID_T
+        """
+        if self._guid is not None:
+            return self._guid
+        self._guid = ty.cast(
+            Project.GUID_T, self.get_ext_state(EXT_SECTION, 'guid')
+        )
+        if self._guid == '':
+            self._guid = self.GUID_new()
+        return self._guid
+
+    def GUID_new(self) -> Project.GUID_T:
+        """Put new GUID into the project.
+
+        Returns
+        -------
+        Project.GUID_T
+        """
+        self._guid = ty.cast(Project.GUID_T, str(uuid4()))
+        self.set_ext_state(EXT_SECTION, 'guid', self._guid)
+        return self._guid
+
+    @rpr.inside_reaper()
+    def __getstate__(self) -> ty.Dict[str, object]:
+        state = self.__dict__
+        s_id = self.GUID
+        state['_guid'] = s_id
+        return state
+
+    @rpr.inside_reaper()
+    def __setstate__(self, state: ty.Dict[str, object]) -> None:
+        guid = state['_guid']
+        for pr in rpr.get_projects():
+            if pr.get_ext_state(EXT_SECTION, 'guid') == guid:
+                state['id'] = pr.id
+                for k, v in state.items():
+                    self.__dict__[k] = v
+                return
+        raise KeyError(f"cannot find project with guid {guid}")
 
     @property
     def host(self) -> Host:
@@ -150,7 +197,9 @@ class Project(rpr.Project):
 
 class SlaveProject(Project):
     dirty: bool
-    master_track: rs.Track
+    master_track: ss.Track
+    _id: ty.Optional[Project.ID]
+
     # subproject: SlaveSubProject
 
     # master_out_tracks: ty.Dict[MasterOutrs.Track.ID, MasterOutrs.Track]
@@ -158,6 +207,38 @@ class SlaveProject(Project):
     # freezed: bool
     # disabled: bool
     # unloaded: bool
+
+    def __init__(
+        self, id: ty.Union[str, int], ip: HostIP = HostIP('localhost')
+    ) -> None:
+        super().__init__(id, ip)
+        self._id = self.id
+
+    @property  # type:ignore
+    def id(self) -> Project.ID:  # type:ignore
+        if self._id is None:
+            if self._guid is None:
+                raise SessionError(
+                    'Something is very wrong during slave instantiation'
+                )
+            raise SlaveUnacessible(
+                f'Slave with guid {self.GUID} can not be found'
+            )
+        return self._id
+
+    @id.setter
+    def id(self, id_: ty.Optional[ty.Union[str, int]]) -> None:
+        if isinstance(id_, str) and id_.startswith('(ReaProject*)0x'):
+            self._id = ty.cast(Project.ID, id_)
+            return
+        self._id = ty.cast(Project.ID, rpr.Project(id_).id)
+
+    def __setstate__(self, state: ty.Dict[str, object]) -> None:
+        try:
+            super().__setstate__(state)
+        except KeyError:
+            self.__dict__ = state
+        self._id = None
 
     @property
     def is_accessible(self) -> bool:
@@ -167,7 +248,7 @@ class SlaveProject(Project):
                     if pr.id == self.id:
                         return True
                 return False
-        except rpr.errors.DisabledDistAPIError:
+        except (rpr.errors.DisabledDistAPIError, SlaveUnacessible):
             return False
 
     @property

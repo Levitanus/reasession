@@ -10,6 +10,7 @@ render_midi = {}
 -- NOTE: JSFX will be deleted
 function render_midi.get_midi_from_track(track, fx)
     -- msg(track, fx)
+    -- reaper.ShowConsoleMsg('\nget_midi_from_track start = ' .. tostring(os.clock()))
     reaper.TrackFX_SetParam(track, fx, 0, 1)
     -- while (reaper.TrackFX_GetParam(track, fx, 0) > 0) do
     --     reaper.ShowConsoleMsg('.')
@@ -44,42 +45,49 @@ function render_midi.get_midi_from_track(track, fx)
         end
         reaper.TrackFX_Delete(track, fx)
     end
+    -- reaper.ShowConsoleMsg('\nget_midi_from_track end = ' .. tostring(os.clock()))
     return trackbuf
 end
 
 -- RETURN: track, fx
 --     `track` is Reaper Track object, `fx` is fx index
 function render_midi.get_task()
+    -- reaper.ShowConsoleMsg('\nget_task start = ' .. tostring(os.clock()))
     fx = tonumber(reaper.GetExtState(SECTION, 'render_midi_fx_idx'))
     trackidx = tonumber(reaper.GetExtState(SECTION, 'render_midi_track_idx'))
     proj = tonumber(reaper.GetExtState(SECTION, 'render_midi_proj_idx'))
     track = reaper.GetTrack(proj, trackidx)
+    -- reaper.ShowConsoleMsg('\nget_task end = ' .. tostring(os.clock()))
     return track, fx
 end
 
 function get_buf_str(buf)
-    local out = '['
+    local buftbl = {}
     for i, v in ipairs(buf) do
-        if i > 1 then out = out .. "," end
-        out = out .. string.format('%s', v)
+        -- if i > 1 then table.insert(buftbl, ',') end
+        table.insert(buftbl, tostring(v))
     end
-    return out .. ']'
+    return string.format('[%s]', table.concat(buftbl, ','))
 end
 
 function render_midi.trackbuf_to_str(trackbuf)
-    local result_str = '['
+    -- reaper.ShowConsoleMsg('\ntrackbuf_to_str start = ' .. tostring(os.clock()))
+    local restbl = {}
     for i, v in ipairs(trackbuf) do
-        if i > 1 then result_str = result_str .. "," end
+        -- if i > 1 then table.insert(restbl, ',') end
         local qn = v['qn']
         local bus = v['bufBus']
         local buf = get_buf_str(v['bufOut'])
         -- reaper.ShowConsoleMsg('\n'..buf)
         local item = string.format('{"qn":%s, "bus":%s, "buf":%s}', qn, bus, buf)
         -- reaper.ShowConsoleMsg('\n'..item)
-        result_str = result_str .. item
+        table.insert(restbl, item)
         -- reaper.ShowConsoleMsg('\n'..result_str)
     end
-    return result_str .. ']'
+    local result = string.format('[%s]', table.concat(restbl, ','))
+    -- reaper.ShowConsoleMsg('\ntrackbuf_to_str end = ' .. tostring(os.clock()))
+    -- reaper.ShowConsoleMsg('\nresult:\n--------\n' .. result)
+    return result
 end
 
 -- reaper.ShowConsoleMsg('running\n')

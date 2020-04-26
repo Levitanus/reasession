@@ -9,6 +9,10 @@ class SessionError(Exception):
     pass
 
 
+class SlaveUnacessible(SessionError):
+    pass
+
+
 class FreezeState(IntEnum):
     """Represents Project or Track Instruments state.
 
@@ -40,3 +44,18 @@ class CashedProperty:
 
     def __call__(self, func: FT) -> FT:
         ...
+
+
+def lua_kv_formatter(k: ty.Union[int, str], v: ty.Union[float, str]) -> str:
+    """Make string from arg and value to send as table to lua script."""
+    if isinstance(k, int):
+        k += 1
+    k, v = map(
+        lambda i: f'{i}' if isinstance(i, (float, int)) else f'"{i}"', (k, v)
+    )
+    return f'[{k}]={v}'
+
+
+def lua_table_formatter(gen: ty.Iterator[str]) -> str:
+    """Join formated members to one lua table as string."""
+    return f'{{{",".join(gen)}}}'

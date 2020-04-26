@@ -1,9 +1,10 @@
 import typing as ty
 import pytest as pt
 import mock
+import pickle
 import reapy as rpr
 from reapy import reascript_api as RPR
-from .. import session as ss
+from reasession import session as ss
 from . import MASTER_PROJ_NAME, SLAVE_PROJECT_NAME
 
 
@@ -26,8 +27,8 @@ def test_master_out_track():
     m_pr.make_current_project()
     # m_tr = rpr.Track(id='out', project=m_pr)
     # print(s_pr.__module__, s_pr.__qualname__)
-    with s_pr.make_current_project():
-        s_tr = ss.SlaveInTrack(id='in', project=s_pr)
+    # with s_pr.make_current_project():
+    s_tr = ss.SlaveInTrack(id='in', project=s_pr)
     o_track = ss.MasterOutTrack(id='out', project=m_pr, target=s_tr)
     assert s_tr.project.last_ip == 'localhost'
 
@@ -40,47 +41,47 @@ def test_master_out_track():
     matched = o_track.match_childs()
     m_id = rpr.Track(id='B4', project=m_pr).id
     assert matched[m_id].target.s_project.last_ip == 'localhost'
-    with s_pr.make_current_project():
-        print(matched[m_id].target.name)
-        assert matched[m_id].target == rpr.Track(id='B4', project=s_pr)
+    # with s_pr.make_current_project():
+    # print(matched[m_id].target.name)
+    assert matched[m_id].target == rpr.Track(id='B4', project=s_pr)
 
     m_id = rpr.Track(id='B3Ch4', project=m_pr).id
-    with s_pr.make_current_project():
-        assert matched[m_id].target == rpr.Track(id='B3Ch4', project=s_pr)
+    # with s_pr.make_current_project():
+    assert matched[m_id].target == rpr.Track(id='B3Ch4', project=s_pr)
 
     m_id = rpr.Track(id='B4Ch1B1', project=m_pr).id
-    with s_pr.make_current_project():
-        assert matched[m_id].target == rpr.Track(id='B4Ch1', project=s_pr)
+    # with s_pr.make_current_project():
+    assert matched[m_id].target == rpr.Track(id='B4Ch1', project=s_pr)
 
     m_id = rpr.Track(id='B2Ch1B1', project=m_pr).id
-    with s_pr.make_current_project():
-        assert matched[m_id].target == rpr.Track(id='B2Ch1B1', project=s_pr)
+    # with s_pr.make_current_project():
+    assert matched[m_id].target == rpr.Track(id='B2Ch1B1', project=s_pr)
 
     # recarm
     master_names = ('B1', 'B3Ch4', 'B4Ch1B1')
     slave_names = ('B1', 'B3Ch4', 'B4Ch1')
-    with m_pr.make_current_project():
-        for name in master_names:
-            tr = ss.Track(id=name, project=m_pr)
-            tr.recarm = True
+    # with m_pr.make_current_project():
+    for name in master_names:
+        tr = ss.Track(id=name, project=m_pr)
+        tr.recarm = True
     o_track.sync_recarm()
-    with s_pr.make_current_project():
-        tr = ss.Track(id='B4', project=s_pr)
-        assert tr.recarm == False
-        for name in slave_names:
-            tr = ss.Track(id=name, project=s_pr)
-            assert tr.recarm == True
-    with m_pr.make_current_project():
-        for name in master_names:
-            tr = ss.Track(id=name, project=m_pr)
-            tr.recarm = False
+    # with s_pr.make_current_project():
+    tr = ss.Track(id='B4', project=s_pr)
+    assert tr.recarm == False
+    for name in slave_names:
+        tr = ss.Track(id=name, project=s_pr)
+        assert tr.recarm == True
+    # with m_pr.make_current_project():
+    for name in master_names:
+        tr = ss.Track(id=name, project=m_pr)
+        tr.recarm = False
     o_track.sync_recarm()
-    with s_pr.make_current_project():
-        tr = ss.Track(id='B4', project=s_pr)
+    # with s_pr.make_current_project():
+    tr = ss.Track(id='B4', project=s_pr)
+    assert tr.recarm == False
+    for name in slave_names:
+        tr = ss.Track(id=name, project=s_pr)
         assert tr.recarm == False
-        for name in slave_names:
-            tr = ss.Track(id=name, project=s_pr)
-            assert tr.recarm == False
 
 
 @pt.mark.skipif(
@@ -91,13 +92,13 @@ def test_master_out_track():
 def test_slave_track(mConnect):
     host = '192.168.2.1'
     pr = ss.SlaveProject(id=SLAVE_PROJECT_NAME, ip=host)
-    with pr.make_current_project():
-        tr = ss.SlaveInTrack(id='in', project=pr)
+    # with pr.make_current_project():
+    tr = ss.SlaveInTrack(id='in', project=pr)
     rpr.Project(MASTER_PROJ_NAME).make_current_project()
     with tr.connect():
         mConnect.assert_called_with(host)
         assert tr.name == 'in'
-    assert tr.name == ''
+    # assert tr.name == ''
 
 
 class MonkeySessTrack:
@@ -189,7 +190,7 @@ def test_childs_tree():
                     ss.ChildAddress(1, 2):
                         ss.Child(tracks_out['B3ChallB1Ch2'])
                 }
-        ),
+            ),
         ss.ChildAddress(4, 0):
             ss.Child(
                 track=tracks_out['B4Chall'],
@@ -199,7 +200,7 @@ def test_childs_tree():
                     ss.ChildAddress(2, 2):
                         ss.Child(tracks_out['B4ChallB2Ch2'])
                 }
-        ),
+            ),
         ss.ChildAddress(5, 0):
             ss.Child(
                 track=tracks_out['B5Chall'],
@@ -213,15 +214,15 @@ def test_childs_tree():
                                 ss.ChildAddress(1, 0):
                                     ss.Child(
                                         tracks_out['B5ChallB2Ch1B1Chall']
-                                ),
+                                    ),
                                 ss.ChildAddress(2, 0):
                                     ss.Child(
                                         tracks_out['B5ChallB2Ch1B2Chall']
-                                ),
+                                    ),
                             }
-                    ),
+                        ),
                 }
-        ),
+            ),
     }
     tree_in = {
         ss.ChildAddress(1, 0):
@@ -235,7 +236,7 @@ def test_childs_tree():
                     ss.ChildAddress(1, 1): ss.Child(tracks_in['B3ChallB1Ch1']),
                     ss.ChildAddress(1, 2): ss.Child(tracks_in['B3ChallB1Ch2'])
                 }
-        ),
+            ),
         ss.ChildAddress(4, 0):
             ss.Child(track=tracks_in['B4Chall']),
         ss.ChildAddress(5, 0):
@@ -245,7 +246,7 @@ def test_childs_tree():
                     ss.ChildAddress(2, 1): ss.Child(tracks_in['B5ChallB2Ch1']),
                     ss.ChildAddress(2, 2): ss.Child(tracks_in['B5ChallB2Ch2'])
                 }
-        ),
+            ),
     }
     init_target = ss.Track('slave_in')
     # tracks matched primary\secondary
@@ -279,9 +280,7 @@ def test_get_childs_tree():
     assert tree[(0, 1)].childs[(1, 0)].track.name == 'B4Ch1B1'
 
 
-@pt.mark.skipif(
-    not rpr.dist_api_is_enabled(), reason='not connected to reaper'
-)
+@pt.mark.skipif(not rpr.dist_api_is_enabled(), reason='not connected')
 def test_bus_packed():
 
     def track(id: str) -> ss.Track:
@@ -294,3 +293,20 @@ def test_bus_packed():
     tr = track('unpacked')
     assert tr.buses_packed is False
     assert tr.buses_unpacked is True
+
+
+@pt.mark.skipif(not rpr.dist_api_is_enabled(), reason='not connected')
+def test_pickled(request):
+    tr = ss.Track('slave1', ss.Project('test_master_persistent'))
+    old_id = tr.id
+    dump = pickle.dumps(tr)
+    assert str(dump).find('_guid')
+    loaded = ty.cast(ss.Track, pickle.loads(dump))
+    assert loaded.GUID == tr.GUID
+    c_id = request.config.cache.get('test_pickled/id', None)
+    if c_id is None:
+        request.config.cache.set('test_pickled/id', old_id)
+    else:
+        old_id = c_id
+        assert old_id != loaded.id
+    assert loaded.id == tr.id
