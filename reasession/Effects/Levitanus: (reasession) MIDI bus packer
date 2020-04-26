@@ -1,0 +1,45 @@
+desc:Levitanus: (reasession) MIDI bus packer
+
+slider1:1<0,1,{pack, unpack}>mode
+@init
+	pack = 0;
+	unpack = 1;
+	ext_midi_bus = 1;
+	maxlen = 65536;
+	buf_ofst = 10000;
+	pack_bus = 0;
+
+
+// 0xf0 0x0d 0x<bus> ... 0xf7
+// function pack_buf(i_buf, i_len, i_bus)
+// local(nbuf_ofst, start_count, end_count, i)
+// (
+// 	nbuf_ofst = buf_ofst+maxlen;
+// 	i_buf[0] == 0xf0 ? (
+// 		i_buf[1] != 0x0d ? (
+			
+// 			result = i_buf
+// 		) : (
+
+// 		);
+// 	) : (
+
+// 	);
+// );
+
+@block
+	while((len = midirecv_buf(offset, buf_ofst, maxlen)) > 0)(
+		slider1 == pack ?(
+			(buf_ofst-3)[0] = 0xf0;
+			(buf_ofst-3)[1] = 0xd0;
+			(buf_ofst-3)[2] = midi_bus;
+			buf_ofst[len] = 0xf7;
+			midisend_buf(offset, (buf_ofst-3), (len+4));
+		) : (
+			// bus, out_buf, out_len = unpack_buf(buf, len);
+			midisend_buf(offset, buf_ofst, len);
+		);
+		// midi_bus = bus;
+		// midisend_buf(offset, out_buf, out_len);
+	);
+
